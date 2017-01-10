@@ -49,7 +49,9 @@ def basic(demux: SingleLanePerSampleSingleEndFastqDirFmt,
           minimum_quality: int=3,
           quality_window: int=3,
           min_length_fraction: float=0.75,
-          maximum_ambiguous: int=0) -> SingleLanePerSampleSingleEndFastqDirFmt:
+          maximum_ambiguous: int=0) \
+                  -> (SingleLanePerSampleSingleEndFastqDirFmt,
+                      pd.DataFrame):
     result = SingleLanePerSampleSingleEndFastqDirFmt()
     
     manifest = FastqManifestFormat()
@@ -83,13 +85,20 @@ def basic(demux: SingleLanePerSampleSingleEndFastqDirFmt,
                                            barcode_id=bc_id,
                                            lane_number=1,
                                            read_number=1)
+
+        # we do not open a writer by default in the event that all sequences
+        # for a sample are filtered out; an empty fastq file is not a valid
+        # fastq file.
         writer = None
         for sequence_record in _read_fastq_seqs(str(fp), phred_offset):
             log_records_totalread_counts[sample_id] += 1
+
+            # determine the length of the runs below quality threshold
             qual_below_threshold = sequence_record[4] < minimum_quality
             run_starts, run_lengths = _runs_of_ones(qual_below_threshold)
             bad_windows = np.argwhere(run_lengths >= quality_window)
-            
+           
+            # if there is a run of sufficient size, truncate it
             if bad_windows.size > 0:
                 log_records_truncated_counts[sample_id] += 1
                 
@@ -97,7 +106,7 @@ def basic(demux: SingleLanePerSampleSingleEndFastqDirFmt,
                 sequence_record = _truncate(sequence_record, run_starts[bad_windows[0]][0])
                 trunc_length = len(sequence_record[1])
             
-                # do not keep the read if it is too short
+                # do not keep the read if it is too short following truncation
                 if (trunc_length / full_length) < min_length_fraction:
                     log_records_tooshort_counts[sample_id] += 1
                     continue
@@ -125,15 +134,16 @@ def basic(demux: SingleLanePerSampleSingleEndFastqDirFmt,
     metadata.path.write_text(yaml.dump({'phred-offset': phred_offset}))
     result.metadata.write_data(metadata, YamlFormat)
 
-    # dump run information if verbose
-    print('\t'.join(['#SampleID', 'Total input reads', 'Reads Truncated', 
-                     'Reads too short after truncation', 
-                     'Reads exceeding maximum ambiguous bases']))
-    for id_, _ in sorted(log_records_truncated_counts.items(), 
-                         key=operator.itemgetter(1), reverse=True):
-        print("%s\t%d\t%d\t%d\t%d" % (id_, log_records_totalread_counts[id_],
-                                           log_records_truncated_counts[id_], 
-                                           log_records_tooshort_counts[id_], 
-                                           log_records_max_ambig_counts[id_]))
+    columns = ['sample-id', 'total-input-reads', 'reads-truncated', 
+               'reads-too-short-after-truncation', 
+               'reads-exceeding-maximum-ambiguous-bases']
+    stats = []
+    for id_, _ in sorted(log_records_truncated_counts.items()):
+        stats.append([id_, log_records_totalread_counts[id_],
+                      log_records_truncated_counts[id_], 
+                      log_records_tooshort_counts[id_], 
+                      log_records_max_ambig_counts[id_]])
 
-    return result
+    stats = pd.DataFrame(stats, columns=columns).set_index('sample-id')
+
+    return result, stats

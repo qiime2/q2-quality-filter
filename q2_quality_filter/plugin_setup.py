@@ -1,11 +1,13 @@
-import qiime2.plugin
+import importlib
 
+import qiime2.plugin
 from q2_types.sample_data import SampleData
 from q2_types.per_sample_sequences import SequencesWithQuality
 
 import q2_quality_filter
-from q2_quality_filter._filter import basic
-
+from q2_quality_filter._type import QualityFilterStats
+from q2_quality_filter._format import (QualityFilterStatsFmt, 
+                                       QualityFilterStatsDirFmt)
 
 plugin = qiime2.plugin.Plugin(
     name='quality-filter',
@@ -16,9 +18,16 @@ plugin = qiime2.plugin.Plugin(
     citation_text=None
 )
 
+plugin.register_formats(QualityFilterStatsFmt, QualityFilterStatsDirFmt)
+
+plugin.register_semantic_types(QualityFilterStats)
+plugin.register_semantic_type_to_format(
+            QualityFilterStats,
+                artifact_format=QualityFilterStatsDirFmt
+                )
 
 plugin.methods.register_function(
-    function=basic,
+    function=q2_quality_filter.basic,
     inputs={'demux': SampleData[SequencesWithQuality]},
     parameters={
         'minimum_quality': qiime2.plugin.Int,
@@ -27,9 +36,12 @@ plugin.methods.register_function(
         'maximum_ambiguous': qiime2.plugin.Int
     },
     outputs=[
-        ('filtered_sequences', SampleData[SequencesWithQuality])
+        ('filtered_sequences', SampleData[SequencesWithQuality]),
+        ('filter_stats', QualityFilterStats)
     ],
     name='Quality filterer',
     description=('This method filters sequence based on quality scores and '
                  'the presence of ambiguous base calls.')
 )
+
+importlib.import_module('q2_quality_filter._transformer')

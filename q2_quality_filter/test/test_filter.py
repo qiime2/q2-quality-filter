@@ -1,6 +1,8 @@
 import unittest
 import gzip
 
+import pandas as pd
+import pandas.util.testing as pdt
 from qiime2.sdk import Artifact
 import numpy as np
 import numpy.testing as npt
@@ -62,18 +64,28 @@ class FilterTests(TestPluginBase):
     def test_basic(self):
         ar = Artifact.load(self.get_data_path('simple.qza'))
         view = ar.view(SingleLanePerSampleSingleEndFastqDirFmt)
-        obs_drop_ambig = basic(view, quality_window=2, min_length_fraction=0.25)
+        obs_drop_ambig, stats = basic(view, quality_window=2, 
+                                      min_length_fraction=0.25)
 
         exp_drop_ambig = ["@foo_1",
                           "ATGCATGC",
                           "+",
                           "DDDDBBDD"]
+        columns = ['sample-id', 'total-input-reads', 'reads-truncated', 
+                   'reads-too-short-after-truncation', 
+                   'reads-exceeding-maximum-ambiguous-bases']
+        exp_drop_ambig_stats = pd.DataFrame([('foo', 2, 0, 0, 1),
+                                             ('bar', 1, 0, 0, 1)],
+                                            columns=columns)
+        exp_drop_ambig_stats = exp_drop_ambig_stats.set_index('sample-id')
         obs = []
         for sample_id, fp in obs_drop_ambig.sequences.iter_views(FastqGzFormat):
             obs.extend([l.strip() for l in gzip.open(str(fp), 'rt')])
         self.assertEqual(obs, exp_drop_ambig)
+        pdt.assert_frame_equal(stats, exp_drop_ambig_stats.loc[stats.index])
 
-        obs_trunc = basic(view, quality_window=2, minimum_quality=33, min_length_fraction=0.25)
+        obs_trunc, stats = basic(view, quality_window=2, minimum_quality=33, 
+                                 min_length_fraction=0.25)
         exp_trunc = ["@foo_1",
                      "ATGCATGC",
                      "+",
@@ -82,11 +94,16 @@ class FilterTests(TestPluginBase):
                      "ATA",
                      "+",
                      "DDD"]
+        exp_trunc_stats = pd.DataFrame([('foo', 2, 0, 0, 1),
+                                        ('bar', 1, 1, 0, 0)],
+                                        columns=columns)
+        exp_trunc_stats = exp_trunc_stats.set_index('sample-id')
 
         obs = []
         for sample_id, fp in obs_trunc.sequences.iter_views(FastqGzFormat):
             obs.extend([l.strip() for l in gzip.open(str(fp), 'rt')])
         self.assertEqual(sorted(obs), sorted(exp_trunc))
+        pdt.assert_frame_equal(stats, exp_trunc_stats.loc[stats.index])
 
 
 if __name__ == '__main__':
