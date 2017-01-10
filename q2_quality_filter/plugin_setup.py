@@ -6,7 +6,7 @@ from q2_types.per_sample_sequences import SequencesWithQuality
 
 import q2_quality_filter
 from q2_quality_filter._type import QualityFilterStats
-from q2_quality_filter._format import (QualityFilterStatsFmt, 
+from q2_quality_filter._format import (QualityFilterStatsFmt,
                                        QualityFilterStatsDirFmt)
 
 plugin = qiime2.plugin.Plugin(
@@ -22,9 +22,8 @@ plugin.register_formats(QualityFilterStatsFmt, QualityFilterStatsDirFmt)
 
 plugin.register_semantic_types(QualityFilterStats)
 plugin.register_semantic_type_to_format(
-            QualityFilterStats,
-                artifact_format=QualityFilterStatsDirFmt
-                )
+    QualityFilterStats,
+    artifact_format=QualityFilterStatsDirFmt)
 
 plugin.methods.register_function(
     function=q2_quality_filter.basic,
