@@ -56,9 +56,8 @@ plugin.methods.register_function(
         'min_quality': 'The maximum unacceptable PHRED score',
         'quality_window': ('The maximum number of low quality base calls to '
                            'observe before truncating'),
-        'min_length_fraction': ('The minimum number of consecutive high '
-                                'quality base calls that must be present as a '
-                                'fraction of the read length.'),
+        'min_length_fraction': ('The minimum acceptable fraction of sequence '
+                                'length after truncation.'),
         'max_ambiguous': ('The maximum number of ambiguous base calls. This '
                           'is applied after quality trimming.')
     },
