@@ -12,7 +12,7 @@ from q2_quality_filter._format import (QualityFilterStatsFmt,
 plugin = qiime2.plugin.Plugin(
     name='quality-filter',
     version=q2_quality_filter.__version__,
-    website='Website for q2-quality-filter',
+    website='https://github.com/wasade/q2-quality-filter',
     package='q2_quality_filter',
     user_support_text=None,
     citation_text=None
@@ -29,10 +29,10 @@ plugin.methods.register_function(
     function=q2_quality_filter.basic,
     inputs={'demux': SampleData[SequencesWithQuality]},
     parameters={
-        'minimum_quality': qiime2.plugin.Int,
+        'min_quality': qiime2.plugin.Int,
         'quality_window': qiime2.plugin.Int,
         'min_length_fraction': qiime2.plugin.Float,
-        'maximum_ambiguous': qiime2.plugin.Int
+        'max_ambiguous': qiime2.plugin.Int
     },
     outputs=[
         ('filtered_sequences', SampleData[SequencesWithQuality]),
@@ -45,7 +45,7 @@ plugin.methods.register_function(
 
 plugin.visualizers.register_function(
     function=q2_quality_filter.visualize_stats,
-    inputs={'data': QualityFilterStats},
+    inputs={'filter_stats': QualityFilterStats},
     parameters={},
     name='Visualize filtering stats per sample.',
     description='Display filtering statistics per sample'
