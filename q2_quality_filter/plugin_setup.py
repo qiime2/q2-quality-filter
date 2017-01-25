@@ -28,11 +28,26 @@ plugin.register_semantic_type_to_format(
 plugin.methods.register_function(
     function=q2_quality_filter.basic,
     inputs={'demux': SampleData[SequencesWithQuality]},
+    input_descriptions={
+        'demux': 'The per-sample sequence data to quality filter'
+    },
     parameters={
         'min_quality': qiime2.plugin.Int,
         'quality_window': qiime2.plugin.Int,
         'min_length_fraction': qiime2.plugin.Float,
         'max_ambiguous': qiime2.plugin.Int
+    },
+
+    # descriptions adapted from QIIME 1.9.1's split_libraries_fastq.py
+    parameter_descriptions={
+        'min_quality': 'The maximum unacceptable PHRED score',
+        'quality_window': ('The maximum number of low quality base calls to '
+                           'observe before truncating'),
+        'min_length_fraction': ('The minimum number of consecutive high '
+                                'quality base calls that must be present as a '
+                                'fraction of the read length.'),
+        'max_ambiguous': ('The maximum number of ambiguous base calls. This '
+                          'is applied after quality trimming.')
     },
     outputs=[
         ('filtered_sequences', SampleData[SequencesWithQuality]),
@@ -46,6 +61,9 @@ plugin.methods.register_function(
 plugin.visualizers.register_function(
     function=q2_quality_filter.visualize_stats,
     inputs={'filter_stats': QualityFilterStats},
+    input_descriptions={
+        'filter_stats': 'Quality filter statistics per sample'
+    },
     parameters={},
     name='Visualize filtering stats per sample.',
     description='Display filtering statistics per sample'

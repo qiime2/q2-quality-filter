@@ -95,7 +95,7 @@ def basic(demux: SingleLanePerSampleSingleEndFastqDirFmt,
             log_records_totalread_counts[sample_id] += 1
 
             # determine the length of the runs below quality threshold
-            qual_below_threshold = sequence_record[4] < min_quality
+            qual_below_threshold = sequence_record[4] <= min_quality
             run_starts, run_lengths = _runs_of_ones(qual_below_threshold)
             bad_windows = np.argwhere(run_lengths >= quality_window)
 
