@@ -16,7 +16,8 @@ TEMPLATES = pkg_resources.resource_filename('q2_quality_filter', 'assets')
 
 
 def visualize_stats(output_dir: str, filter_stats: pd.DataFrame) -> None:
-    data.sort_values('total-input-reads', inplace=True, ascending=False)
+    filter_stats.sort_values('total-input-reads', inplace=True,
+                             ascending=False)
 
     html = filter_stats.to_html(classes='table table-striped table-hover')
     html = html.replace('border="1"', 'border="0"')
