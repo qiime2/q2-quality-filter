@@ -26,7 +26,7 @@ plugin.register_semantic_type_to_format(
     artifact_format=QualityFilterStatsDirFmt)
 
 plugin.methods.register_function(
-    function=q2_quality_filter.basic,
+    function=q2_quality_filter.q_score,
     inputs={'demux': SampleData[SequencesWithQuality]},
     input_descriptions={
         'demux': 'The per-sample sequence data to quality filter'

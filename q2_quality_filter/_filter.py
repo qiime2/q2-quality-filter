@@ -45,11 +45,11 @@ def _truncate(sequence_record, position):
 
 # defaults as used by the Deblur manuscript
 # (Amir et al, mSystems 2016, in press)
-def basic(demux: SingleLanePerSampleSingleEndFastqDirFmt,
-          min_quality: int=19,
-          quality_window: int=3,
-          min_length_fraction: float=0.75,
-          max_ambiguous: int=0) \
+def q_score(demux: SingleLanePerSampleSingleEndFastqDirFmt,
+            min_quality: int=19,
+            quality_window: int=3,
+            min_length_fraction: float=0.75,
+            max_ambiguous: int=0) \
                   -> (SingleLanePerSampleSingleEndFastqDirFmt,
                       pd.DataFrame):
     result = SingleLanePerSampleSingleEndFastqDirFmt()

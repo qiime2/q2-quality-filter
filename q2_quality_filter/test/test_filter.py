@@ -12,7 +12,7 @@ from q2_types.per_sample_sequences import (
         SingleLanePerSampleSingleEndFastqDirFmt)
 
 from q2_quality_filter._filter import (_read_fastq_seqs, _runs_of_ones,
-                                       _truncate, basic)
+                                       _truncate, q_score)
 
 
 class FilterTests(TestPluginBase):
@@ -63,11 +63,11 @@ class FilterTests(TestPluginBase):
             self.assertEqual(o2[:4], exp2[i][:4])
             npt.assert_equal(o2[4], exp2[i][4])
 
-    def test_basic(self):
+    def test_q_score(self):
         ar = Artifact.load(self.get_data_path('simple.qza'))
         view = ar.view(SingleLanePerSampleSingleEndFastqDirFmt)
-        obs_drop_ambig, stats = basic(view, quality_window=2,
-                                      min_length_fraction=0.25)
+        obs_drop_ambig, stats = q_score(view, quality_window=2,
+                                        min_length_fraction=0.25)
 
         exp_drop_ambig = ["@foo_1",
                           "ATGCATGC",
@@ -87,8 +87,8 @@ class FilterTests(TestPluginBase):
         self.assertEqual(obs, exp_drop_ambig)
         pdt.assert_frame_equal(stats, exp_drop_ambig_stats.loc[stats.index])
 
-        obs_trunc, stats = basic(view, quality_window=2, min_quality=32,
-                                 min_length_fraction=0.25)
+        obs_trunc, stats = q_score(view, quality_window=2, min_quality=32,
+                                   min_length_fraction=0.25)
         exp_trunc = ["@foo_1",
                      "ATGCATGC",
                      "+",
