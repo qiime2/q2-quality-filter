@@ -1,3 +1,11 @@
+# ----------------------------------------------------------------------------
+# Copyright (c) 2016-2017, QIIME 2 development team.
+#
+# Distributed under the terms of the Modified BSD License.
+#
+# The full license is in the file LICENSE, distributed with this software.
+# ----------------------------------------------------------------------------
+
 import itertools
 import gzip
 import yaml
@@ -43,12 +51,13 @@ def _truncate(sequence_record, position):
     return (sequence_record[0], seq, sequence_record[2], qual, qual_parsed)
 
 
-# defaults from QIIME 1.9.1 split_libraries_fastq.py
-def basic(demux: SingleLanePerSampleSingleEndFastqDirFmt,
-          minimum_quality: int=3,
-          quality_window: int=3,
-          min_length_fraction: float=0.75,
-          maximum_ambiguous: int=0) \
+# defaults as used by the Deblur manuscript
+# (Amir et al, mSystems 2016, in press)
+def q_score(demux: SingleLanePerSampleSingleEndFastqDirFmt,
+            min_quality: int=19,
+            quality_window: int=3,
+            min_length_fraction: float=0.75,
+            max_ambiguous: int=0) \
                   -> (SingleLanePerSampleSingleEndFastqDirFmt,
                       pd.DataFrame):
     result = SingleLanePerSampleSingleEndFastqDirFmt()
@@ -94,7 +103,7 @@ def basic(demux: SingleLanePerSampleSingleEndFastqDirFmt,
             log_records_totalread_counts[sample_id] += 1
 
             # determine the length of the runs below quality threshold
-            qual_below_threshold = sequence_record[4] < minimum_quality
+            qual_below_threshold = sequence_record[4] <= min_quality
             run_starts, run_lengths = _runs_of_ones(qual_below_threshold)
             bad_windows = np.argwhere(run_lengths >= quality_window)
 
@@ -113,7 +122,7 @@ def basic(demux: SingleLanePerSampleSingleEndFastqDirFmt,
                     continue
 
             # do not keep the read if there are too many ambiguous bases
-            if sequence_record[1].count('N') > maximum_ambiguous:
+            if sequence_record[1].count('N') > max_ambiguous:
                 log_records_max_ambig_counts[sample_id] += 1
                 continue
 
