@@ -111,7 +111,6 @@ def q_score(demux: SingleLanePerSampleSingleEndFastqDirFmt,
             if bad_windows.size > 0:
                 log_records_truncated_counts[sample_id] += 1
 
-                #full_length = qual_below_threshold.size
                 full_length = len(sequence_record[1])
                 sequence_record = _truncate(sequence_record,
                                             run_starts[bad_windows[0]][0])
