@@ -116,6 +116,82 @@ class FilterTests(TestPluginBase):
         self.assertEqual(sorted(obs), sorted(exp_trunc))
         pdt.assert_frame_equal(stats, exp_trunc_stats.loc[stats.index])
 
+    def test_q_score_real(self):
+        ar = Artifact.load(self.get_data_path('real_data.qza'))
+        view = ar.view(SingleLanePerSampleSingleEndFastqDirFmt)
+        obs_result, stats = q_score(view, min_quality=39,
+                                    min_length_fraction=0.24)
+
+        # all truncated reads shown, manually identified. comments denote why
+        # the sequence is not retained.
+        exp_result = [
+                      # this record is 25% of full length
+                      "@HWI-EAS440_0386:1:32:15467:1432#0/1",
+                      "TACGGAGGATCCGAGCGTTATCCGGATTTATTGGGTTT",
+                      "+",
+                      "hhhhhhhhhhhhfghhhghghghhhchhhahhhhhfhh",
+
+                      # too short
+                      # "@HWI-EAS440_0386:1:36:9986:17043#0/1",
+                      # "TACGTAGGTGGCAAGCGTTATCCGGATTTATTG",
+                      # "+",
+                      # "hhhhhhhhhhhhhhhhhhhhhhhhhffhhghhh",
+
+                      "@HWI-EAS440_0386:1:37:13343:14820#0/1",
+                      ("TACGGAGGATCCGAGCGTTATCCGGATTTATTGGGTTTAAAGGGAGCGTAGAT"
+                       "GGATGTTTAAGTCAGTTGTG"),
+                      "+",
+                      ("hhhhhhhhhhhhhfhhhhhfhhhhghhhhghhhhhhhhhgghhhgghhhgghh"
+                       "hgdhhhhghghhhdhhhhgh"),
+
+                      "@HWI-EAS440_0386:1:41:18215:15404#0/1",
+                      "TACGTAGGTGGCGAGCGTTGTCCGGAATTATTGGGCGTAAAGAGCATGTA",
+                      "+",
+                      "hhhhhhhhhhhhghhhhhhhhhhhhffhhghhhhghhghgghghhhhhgh",
+
+                      # too short
+                      # "@HWI-EAS440_0386:1:42:5423:19606#0/1",
+                      # "TACGTAGGGAGCAAGCGTT",
+                      # "+",
+                      # "hhhhghhhhhhhhhghhfh",
+
+                      "@HWI-EAS440_0386:1:52:7507:5841#0/1",
+                      "TACGGAGGATCCGAGCGTTATCCGGATTTATTGGGTTT",
+                      "+",
+                      "hhhhhhhhhghhfghhhhhhhhhhgfhhhghhhghdhh",
+
+                      "@HWI-EAS440_0386:1:53:18599:4074#0/1",
+                      "TACGTAGGTGGCAAGCGTTGTCCGGATTTACTGGGTG",
+                      "+",
+                      "hhhhfhhhhhfhhhhhhfhffhghhfgghggghdcbh",
+
+                      # too short
+                      # "@HWI-EAS440_0386:1:55:16425:9514#0/1",
+                      # "TACGGAGGATCCGAGCGTTATCCGGATT",
+                      # "+",
+                      # "hhhhhhhhhhhhfghhhghghhhhhbgh",
+
+                      "@HWI-EAS440_0386:1:65:12049:5619#0/1",
+                      "TACGTAGGTGGCAAGCGTTATCCGGATTTACTGGGTGTAAAGGGCGTG",
+                      "+",
+                      "hhhhhhhhhhhhhhhhhhhhhhhhhfhhhhhhhghdhghhhhhghcfh",
+
+                      # @HWI-EAS440_0386:1:95:4837:16388#0/1
+                      # starts off < Q40
+                      ]
+        columns = ['sample-id', 'total-input-reads', 'reads-truncated',
+                   'reads-too-short-after-truncation',
+                   'reads-exceeding-maximum-ambiguous-bases']
+        exp_stats = pd.DataFrame([('foo', 10, 10, 4, 0)],
+                                 columns=columns)
+        exp_stats = exp_stats.set_index('sample-id')
+        obs = []
+        iterator = obs_result.sequences.iter_views(FastqGzFormat)
+        for sample_id, fp in iterator:
+            obs.extend([l.strip() for l in gzip.open(str(fp), 'rt')])
+        self.assertEqual(obs, exp_result)
+        pdt.assert_frame_equal(stats, exp_stats.loc[stats.index])
+
 
 if __name__ == '__main__':
     unittest.main()
