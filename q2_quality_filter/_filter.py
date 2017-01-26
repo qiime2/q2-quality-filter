@@ -73,6 +73,7 @@ def q_score(demux: SingleLanePerSampleSingleEndFastqDirFmt,
     log_records_max_ambig_counts = {}
     log_records_tooshort_counts = {}
     log_records_totalread_counts = {}
+    log_records_totalkept_counts = {}
 
     metadata_view = demux.metadata.view(YamlFormat).open()
     phred_offset = yaml.load(metadata_view)['phred-offset']
@@ -87,6 +88,7 @@ def q_score(demux: SingleLanePerSampleSingleEndFastqDirFmt,
         log_records_max_ambig_counts[sample_id] = 0
         log_records_tooshort_counts[sample_id] = 0
         log_records_totalread_counts[sample_id] = 0
+        log_records_totalkept_counts[sample_id] = 0
 
         # per q2-demux, barcode ID, lane number and read number are not
         # relevant here
@@ -133,6 +135,8 @@ def q_score(demux: SingleLanePerSampleSingleEndFastqDirFmt,
                 writer = gzip.open(str(path), mode='w')
             writer.write(fastq_lines)
 
+            log_records_totalkept_counts[sample_id] += 1
+
         if writer is not None:
             manifest_fh.write('%s,%s,%s\n' % (sample_id, path.name, 'forward'))
             writer.close()
@@ -144,12 +148,14 @@ def q_score(demux: SingleLanePerSampleSingleEndFastqDirFmt,
     metadata.path.write_text(yaml.dump({'phred-offset': phred_offset}))
     result.metadata.write_data(metadata, YamlFormat)
 
-    columns = ['sample-id', 'total-input-reads', 'reads-truncated',
+    columns = ['sample-id', 'total-input-reads', 'total-retained-reads',
+               'reads-truncated',
                'reads-too-short-after-truncation',
                'reads-exceeding-maximum-ambiguous-bases']
     stats = []
     for id_, _ in sorted(log_records_truncated_counts.items()):
         stats.append([id_, log_records_totalread_counts[id_],
+                      log_records_totalkept_counts[id_],
                       log_records_truncated_counts[id_],
                       log_records_tooshort_counts[id_],
                       log_records_max_ambig_counts[id_]])
