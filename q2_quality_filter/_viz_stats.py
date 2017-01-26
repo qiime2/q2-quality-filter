@@ -16,8 +16,23 @@ TEMPLATES = pkg_resources.resource_filename('q2_quality_filter', 'assets')
 
 
 def visualize_stats(output_dir: str, filter_stats: pd.DataFrame) -> None:
+    #filter_stats = filter_stats.set_index('sample-id')
+    sums = filter_stats.sum()
+    sums.name = 'Totals'
+    filter_stats = filter_stats.append(sums)
+
     filter_stats.sort_values('total-input-reads', inplace=True,
                              ascending=False)
+
+    total_retained = filter_stats['total-retained-reads']
+    total_input = filter_stats['total-input-reads']
+    filter_stats['fraction-retained'] = total_retained / total_input
+
+    # reorder such that retained fraction follows total-input-reads and
+    # total-retained-reads
+    columns = list(filter_stats.columns)[:-1]
+    columns.insert(2, 'fraction-retained')
+    filter_stats = filter_stats[columns]
 
     html = filter_stats.to_html(classes='table table-striped table-hover')
     html = html.replace('border="1"', 'border="0"')

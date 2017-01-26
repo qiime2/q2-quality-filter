@@ -14,6 +14,7 @@ class QualityFilterStatsFmt(model.TextFileFormat):
         line = open(str(self)).readline()
         hdr = line.strip().split(',')
         expected = ['sample-id', 'total-input-reads',
+                    'total-retained-reads',
                     'reads-truncated',
                     'reads-too-short-after-truncation',
                     'reads-exceeding-maximum-ambiguous-bases']
