@@ -16,7 +16,6 @@ TEMPLATES = pkg_resources.resource_filename('q2_quality_filter', 'assets')
 
 
 def visualize_stats(output_dir: str, filter_stats: pd.DataFrame) -> None:
-    #filter_stats = filter_stats.set_index('sample-id')
     sums = filter_stats.sum()
     sums.name = 'Totals'
     filter_stats = filter_stats.append(sums)
