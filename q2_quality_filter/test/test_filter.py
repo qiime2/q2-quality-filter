@@ -81,11 +81,12 @@ class FilterTests(TestPluginBase):
                           "ATGCATGC",
                           "+",
                           "DDDDBBDD"]
-        columns = ['sample-id', 'total-input-reads', 'reads-truncated',
+        columns = ['sample-id', 'total-input-reads', 'total-retained-reads',
+                   'reads-truncated',
                    'reads-too-short-after-truncation',
                    'reads-exceeding-maximum-ambiguous-bases']
-        exp_drop_ambig_stats = pd.DataFrame([('foo', 2, 0, 0, 1),
-                                             ('bar', 1, 0, 0, 1)],
+        exp_drop_ambig_stats = pd.DataFrame([('foo', 2, 1, 0, 0, 1),
+                                             ('bar', 1, 0, 0, 0, 1)],
                                             columns=columns)
         exp_drop_ambig_stats = exp_drop_ambig_stats.set_index('sample-id')
         obs = []
@@ -105,8 +106,8 @@ class FilterTests(TestPluginBase):
                      "ATA",
                      "+",
                      "DDD"]
-        exp_trunc_stats = pd.DataFrame([('foo', 2, 0, 0, 1),
-                                        ('bar', 1, 1, 0, 0)],
+        exp_trunc_stats = pd.DataFrame([('foo', 2, 1, 0, 0, 1),
+                                        ('bar', 1, 1, 1, 0, 0)],
                                        columns=columns)
         exp_trunc_stats = exp_trunc_stats.set_index('sample-id')
 
@@ -184,10 +185,12 @@ class FilterTests(TestPluginBase):
                       # @HWI-EAS440_0386:1:95:4837:16388#0/1
                       # starts off < Q40
                       ]
-        columns = ['sample-id', 'total-input-reads', 'reads-truncated',
+
+        columns = ['sample-id', 'total-input-reads', 'total-retained-reads',
+                   'reads-truncated',
                    'reads-too-short-after-truncation',
                    'reads-exceeding-maximum-ambiguous-bases']
-        exp_stats = pd.DataFrame([('foo', 10, 10, 4, 0)],
+        exp_stats = pd.DataFrame([('foo', 10, 6, 10, 4, 0)],
                                  columns=columns)
         exp_stats = exp_stats.set_index('sample-id')
         obs = []
