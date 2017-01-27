@@ -122,10 +122,15 @@ class FilterTests(TestPluginBase):
         obs_result, stats = q_score(view, min_quality=39,
                                     min_length_fraction=0.24)
 
-        # all truncated reads shown, manually identified. comments denote why
-        # the sequence is not retained.
+        # All input reads are represented here in their post-quality filtered
+        # form. Reads that are commented out were manually identified as being
+        # filtered by the q_score method. For the commented reads, the comments
+        # denote why the read is not retained.
+
+        # The first read, @HWI-EAS440_0386:1:32:15467:1432#0/1, is 25% of
+        # total read length and is indicative of a sequence at the
+        # min_length_fraction boundary.
         exp_result = [
-                      # this record is 25% of full length
                       "@HWI-EAS440_0386:1:32:15467:1432#0/1",
                       "TACGGAGGATCCGAGCGTTATCCGGATTTATTGGGTTT",
                       "+",
