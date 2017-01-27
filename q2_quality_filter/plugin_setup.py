@@ -53,7 +53,7 @@ plugin.methods.register_function(
 
     # descriptions adapted from QIIME 1.9.1's split_libraries_fastq.py
     parameter_descriptions={
-        'min_quality': 'The maximum unacceptable PHRED score',
+        'min_quality': 'The minimum acceptable PHRED score',
         'quality_window': ('The maximum number of low quality base calls to '
                            'observe before truncating'),
         'min_length_fraction': ('The minimum acceptable fraction of sequence '
