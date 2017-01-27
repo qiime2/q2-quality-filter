@@ -95,7 +95,7 @@ class FilterTests(TestPluginBase):
         self.assertEqual(obs, exp_drop_ambig)
         pdt.assert_frame_equal(stats, exp_drop_ambig_stats.loc[stats.index])
 
-        obs_trunc, stats = q_score(view, quality_window=2, min_quality=32,
+        obs_trunc, stats = q_score(view, quality_window=1, min_quality=32,
                                    min_length_fraction=0.25)
         exp_trunc = ["@foo_1",
                      "ATGCATGC",

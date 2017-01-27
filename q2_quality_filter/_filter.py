@@ -105,19 +105,19 @@ def q_score(demux: SingleLanePerSampleSingleEndFastqDirFmt,
             # determine the length of the runs below quality threshold
             qual_below_threshold = sequence_record[4] <= min_quality
             run_starts, run_lengths = _runs_of_ones(qual_below_threshold)
-            bad_windows = np.argwhere(run_lengths >= quality_window)
+            bad_windows = np.argwhere(run_lengths > quality_window)
 
             # if there is a run of sufficient size, truncate it
             if bad_windows.size > 0:
                 log_records_truncated_counts[sample_id] += 1
 
-                full_length = qual_below_threshold.size
+                full_length = len(sequence_record[1])
                 sequence_record = _truncate(sequence_record,
                                             run_starts[bad_windows[0]][0])
                 trunc_length = len(sequence_record[1])
 
                 # do not keep the read if it is too short following truncation
-                if (trunc_length / full_length) < min_length_fraction:
+                if round(trunc_length / full_length, 3) <= min_length_fraction:
                     log_records_tooshort_counts[sample_id] += 1
                     continue
 
