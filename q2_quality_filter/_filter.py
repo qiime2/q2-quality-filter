@@ -54,7 +54,7 @@ def _truncate(sequence_record, position):
 # defaults as used by the Deblur manuscript
 # (Amir et al, mSystems 2016, in press)
 def q_score(demux: SingleLanePerSampleSingleEndFastqDirFmt,
-            min_quality: int=19,
+            min_quality: int=20,
             quality_window: int=3,
             min_length_fraction: float=0.75,
             max_ambiguous: int=0) \
@@ -103,7 +103,11 @@ def q_score(demux: SingleLanePerSampleSingleEndFastqDirFmt,
             log_records_totalread_counts[sample_id] += 1
 
             # determine the length of the runs below quality threshold
-            qual_below_threshold = sequence_record[4] <= min_quality
+            # NOTE: QIIME 1.x used <= the quality threshold and the parameter
+            #   -q was interpreted as the maximum unacceptable PHRED score. In
+            #   QIIME 2.x, we're now interpreting this as the minimum
+            #   acceptable score.
+            qual_below_threshold = sequence_record[4] < min_quality
             run_starts, run_lengths = _runs_of_ones(qual_below_threshold)
             bad_windows = np.argwhere(run_lengths > quality_window)
 

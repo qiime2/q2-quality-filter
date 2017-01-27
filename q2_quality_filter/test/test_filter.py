@@ -95,7 +95,7 @@ class FilterTests(TestPluginBase):
         self.assertEqual(obs, exp_drop_ambig)
         pdt.assert_frame_equal(stats, exp_drop_ambig_stats.loc[stats.index])
 
-        obs_trunc, stats = q_score(view, quality_window=1, min_quality=32,
+        obs_trunc, stats = q_score(view, quality_window=1, min_quality=33,
                                    min_length_fraction=0.25)
         exp_trunc = ["@foo_1",
                      "ATGCATGC",
@@ -119,7 +119,7 @@ class FilterTests(TestPluginBase):
     def test_q_score_real(self):
         ar = Artifact.load(self.get_data_path('real_data.qza'))
         view = ar.view(SingleLanePerSampleSingleEndFastqDirFmt)
-        obs_result, stats = q_score(view, min_quality=39,
+        obs_result, stats = q_score(view, min_quality=40,
                                     min_length_fraction=0.24)
 
         # All input reads are represented here in their post-quality filtered
