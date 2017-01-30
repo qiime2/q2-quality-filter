@@ -41,31 +41,39 @@ plugin.register_semantic_type_to_format(
 plugin.methods.register_function(
     function=q2_quality_filter.q_score,
     inputs={'demux': SampleData[SequencesWithQuality]},
-    input_descriptions={
-        'demux': 'The per-sample sequence data to quality filter'
-    },
     parameters={
         'min_quality': qiime2.plugin.Int,
         'quality_window': qiime2.plugin.Int,
         'min_length_fraction': qiime2.plugin.Float,
         'max_ambiguous': qiime2.plugin.Int
     },
-
-    # descriptions adapted from QIIME 1.9.1's split_libraries_fastq.py
-    parameter_descriptions={
-        'min_quality': 'The minimum acceptable PHRED score',
-        'quality_window': ('The maximum number of low quality base calls to '
-                           'observe before truncating'),
-        'min_length_fraction': ('The minimum acceptable fraction of sequence '
-                                'length after truncation.'),
-        'max_ambiguous': ('The maximum number of ambiguous base calls. This '
-                          'is applied after quality trimming.')
-    },
     outputs=[
         ('filtered_sequences', SampleData[SequencesWithQuality]),
         ('filter_stats', QualityFilterStats)
     ],
-    name='Quality filterer',
+    input_descriptions={
+        'demux': 'The demultiplexed sequence data to be quality filtered.'
+    },
+    parameter_descriptions={
+        'min_quality': ('The minimum acceptable PHRED score. All PHRED scores '
+                        'less that this value are considered to be low PHRED '
+                        'scores.'),
+        'quality_window': ('The maximum number of low PHRED scores that '
+                           'can be observed in direct succession before '
+                           'truncating a sequence read.'),
+        'min_length_fraction': ('The minimum length that a sequence read can '
+                                'be following truncation and still be '
+                                'retained. This length should be provided '
+                                'as a fraction of the input sequence length.'),
+        'max_ambiguous': ('The maximum number of ambiguous (i.e., N) base '
+                          'calls. This is applied after trimming sequences '
+                          'based on `min_length_fraction`.')
+    },
+    output_descriptions={
+        'filtered_sequences': 'The resulting quality-filtered sequences.',
+        'filter_stats': 'Summary statistics of the filtering process.'
+    },
+    name='Quality filter based on sequence quality scores.',
     description=('This method filters sequence based on quality scores and '
                  'the presence of ambiguous base calls.')
 )
@@ -73,10 +81,11 @@ plugin.methods.register_function(
 plugin.visualizers.register_function(
     function=q2_quality_filter.visualize_stats,
     inputs={'filter_stats': QualityFilterStats},
-    input_descriptions={
-        'filter_stats': 'Quality filter statistics per sample'
-    },
     parameters={},
+    input_descriptions={
+        'filter_stats': 'Summary statistics of a quality filtering process.'
+    },
+    parameter_descriptions={},
     name='Visualize filtering stats per sample.',
     description='Display filtering statistics per sample'
 )
