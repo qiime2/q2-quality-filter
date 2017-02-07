@@ -11,7 +11,7 @@ from setuptools import setup, find_packages
 
 setup(
     name="q2-quality-filter",
-    version="2017.1.0.dev0",
+    version="2017.2.0",
     packages=find_packages(),
     install_requires=['qiime2 == 2017.2.*', 'q2templates == 2017.2.*',
                       'pandas', 'q2-types == 2017.2.*'],
