@@ -71,6 +71,13 @@ class FilterTests(TestPluginBase):
             self.assertEqual(o2[:4], exp2[i][:4])
             npt.assert_equal(o2[4], exp2[i][4])
 
+    def test_q_score_all_dropped(self):
+        ar = Artifact.load(self.get_data_path('simple.qza'))
+        view = ar.view(SingleLanePerSampleSingleEndFastqDirFmt)
+
+        with self.assertRaisesRegex(ValueError, "filtered out"):
+            q_score(view, min_quality=50)
+
     def test_q_score(self):
         ar = Artifact.load(self.get_data_path('simple.qza'))
         view = ar.view(SingleLanePerSampleSingleEndFastqDirFmt)
