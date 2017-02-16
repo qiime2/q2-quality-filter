@@ -145,6 +145,11 @@ def q_score(demux: SingleLanePerSampleSingleEndFastqDirFmt,
             manifest_fh.write('%s,%s,%s\n' % (sample_id, path.name, 'forward'))
             writer.close()
 
+    if set(log_records_totalkept_counts.values()) == {0, }:
+        raise ValueError("All sequences from all samples were filtered out. "
+                         "The parameter choices may be too stringent for the "
+                         "data.")
+
     manifest_fh.close()
     result.manifest.write_data(manifest, FastqManifestFormat)
 
