@@ -84,11 +84,10 @@ class FilterTests(TestPluginBase):
         exp_sids = {'00123', '0.4560'}
         obs, stats = q_score(view)
         obs_manifest = obs.manifest.view(obs.manifest.format)
-        obs_manifest = pd.read_csv(obs_manifest.open(), comment='#')
+        obs_manifest = pd.read_csv(obs_manifest.open(), dtype=str, comment='#')
         obs_manifest.set_index('sample-id', inplace=True)
 
         obs_sids = set(obs_manifest.index)
-        print(obs_sids)
         self.assertEqual(obs_sids, exp_sids)
         self.assertEqual(set(stats.index), exp_sids)
 
