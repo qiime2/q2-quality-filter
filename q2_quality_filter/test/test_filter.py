@@ -78,6 +78,20 @@ class FilterTests(TestPluginBase):
         with self.assertRaisesRegex(ValueError, "filtered out"):
             q_score(view, min_quality=50)
 
+    def test_q_score_numeric_ids(self):
+        ar = Artifact.load(self.get_data_path('numeric_ids.qza'))
+        view = ar.view(SingleLanePerSampleSingleEndFastqDirFmt)
+        exp_sids = {'00123', '0.4560'}
+        obs, stats = q_score(view)
+        obs_manifest = obs.manifest.view(obs.manifest.format)
+        obs_manifest = pd.read_csv(obs_manifest.open(), comment='#')
+        obs_manifest.set_index('sample-id', inplace=True)
+
+        obs_sids = set(obs_manifest.index)
+        print(obs_sids)
+        self.assertEqual(obs_sids, exp_sids)
+        self.assertEqual(set(stats.index), exp_sids)
+
     def test_q_score(self):
         ar = Artifact.load(self.get_data_path('simple.qza'))
         view = ar.view(SingleLanePerSampleSingleEndFastqDirFmt)
