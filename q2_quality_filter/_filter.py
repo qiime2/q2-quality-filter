@@ -78,7 +78,8 @@ def q_score(demux: SingleLanePerSampleSingleEndFastqDirFmt,
     metadata_view = demux.metadata.view(YamlFormat).open()
     phred_offset = yaml.load(metadata_view)['phred-offset']
     demux_manifest = demux.manifest.view(demux.manifest.format)
-    demux_manifest = pd.read_csv(demux_manifest.open()).set_index('filename')
+    demux_manifest = pd.read_csv(demux_manifest.open(), dtype=str)
+    demux_manifest.set_index('filename', inplace=True)
 
     iterator = demux.sequences.iter_views(FastqGzFormat)
     for bc_id, (fname, fp) in enumerate(iterator):
