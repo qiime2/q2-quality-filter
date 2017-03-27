@@ -6,11 +6,11 @@
 # The full license is in the file LICENSE, distributed with this software.
 # ----------------------------------------------------------------------------
 
-import pkg_resources
-
 from ._filter import q_score
 from ._viz_stats import visualize_stats
+from ._version import get_versions
 
-__version__ = pkg_resources.get_distribution('q2-quality-filter').version
+__version__ = get_versions()['version']
+del get_versions
 
 __all__ = ['q_score', 'visualize_stats']
