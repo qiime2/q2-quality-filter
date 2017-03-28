@@ -20,6 +20,7 @@ setup(
     author_email="wasade@gmail.com",
     url="https://github.com/wasade/q2-quality-filter",
     description="Basic FASTQ quality filtering",
+    license='BSD-3-Clause',
     entry_points={
         "qiime2.plugins":
         ["q2-quality-filter=q2_quality_filter.plugin_setup:plugin"]
