@@ -14,8 +14,6 @@ setup(
     version=versioneer.get_version(),
     cmdclass=versioneer.get_cmdclass(),
     packages=find_packages(),
-    install_requires=['qiime2 == 2017.3.*', 'q2templates == 2017.3.*',
-                      'pandas', 'q2-types == 2017.3.*'],
     author="Daniel McDonald",
     author_email="wasade@gmail.com",
     url="https://github.com/wasade/q2-quality-filter",
