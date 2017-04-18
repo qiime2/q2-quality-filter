@@ -78,7 +78,8 @@ def q_score(demux: SingleLanePerSampleSingleEndFastqDirFmt,
     metadata_view = demux.metadata.view(YamlFormat).open()
     phred_offset = yaml.load(metadata_view)['phred-offset']
     demux_manifest = demux.manifest.view(demux.manifest.format)
-    demux_manifest = pd.read_csv(demux_manifest.open()).set_index('filename')
+    demux_manifest = pd.read_csv(demux_manifest.open(), dtype=str)
+    demux_manifest.set_index('filename', inplace=True)
 
     iterator = demux.sequences.iter_views(FastqGzFormat)
     for bc_id, (fname, fp) in enumerate(iterator):
@@ -144,6 +145,11 @@ def q_score(demux: SingleLanePerSampleSingleEndFastqDirFmt,
         if writer is not None:
             manifest_fh.write('%s,%s,%s\n' % (sample_id, path.name, 'forward'))
             writer.close()
+
+    if set(log_records_totalkept_counts.values()) == {0, }:
+        raise ValueError("All sequences from all samples were filtered out. "
+                         "The parameter choices may be too stringent for the "
+                         "data.")
 
     manifest_fh.close()
     result.manifest.write_data(manifest, FastqManifestFormat)

@@ -71,6 +71,26 @@ class FilterTests(TestPluginBase):
             self.assertEqual(o2[:4], exp2[i][:4])
             npt.assert_equal(o2[4], exp2[i][4])
 
+    def test_q_score_all_dropped(self):
+        ar = Artifact.load(self.get_data_path('simple.qza'))
+        view = ar.view(SingleLanePerSampleSingleEndFastqDirFmt)
+
+        with self.assertRaisesRegex(ValueError, "filtered out"):
+            q_score(view, min_quality=50)
+
+    def test_q_score_numeric_ids(self):
+        ar = Artifact.load(self.get_data_path('numeric_ids.qza'))
+        view = ar.view(SingleLanePerSampleSingleEndFastqDirFmt)
+        exp_sids = {'00123', '0.4560'}
+        obs, stats = q_score(view)
+        obs_manifest = obs.manifest.view(obs.manifest.format)
+        obs_manifest = pd.read_csv(obs_manifest.open(), dtype=str, comment='#')
+        obs_manifest.set_index('sample-id', inplace=True)
+
+        obs_sids = set(obs_manifest.index)
+        self.assertEqual(obs_sids, exp_sids)
+        self.assertEqual(set(stats.index), exp_sids)
+
     def test_q_score(self):
         ar = Artifact.load(self.get_data_path('simple.qza'))
         view = ar.view(SingleLanePerSampleSingleEndFastqDirFmt)
