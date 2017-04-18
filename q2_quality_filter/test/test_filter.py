@@ -82,7 +82,7 @@ class FilterTests(TestPluginBase):
         ar = Artifact.load(self.get_data_path('numeric_ids.qza'))
         view = ar.view(SingleLanePerSampleSingleEndFastqDirFmt)
         exp_sids = {'00123', '0.4560'}
-        obs, stats = q_score(view)
+        obs, stats = q_score(view, min_quality=20)
         obs_manifest = obs.manifest.view(obs.manifest.format)
         obs_manifest = pd.read_csv(obs_manifest.open(), dtype=str, comment='#')
         obs_manifest.set_index('sample-id', inplace=True)
@@ -95,6 +95,7 @@ class FilterTests(TestPluginBase):
         ar = Artifact.load(self.get_data_path('simple.qza'))
         view = ar.view(SingleLanePerSampleSingleEndFastqDirFmt)
         obs_drop_ambig, stats = q_score(view, quality_window=2,
+                                        min_quality=20,
                                         min_length_fraction=0.25)
 
         exp_drop_ambig = ["@foo_1",
