@@ -51,10 +51,10 @@ def _truncate(sequence_record, position):
     return (sequence_record[0], seq, sequence_record[2], qual, qual_parsed)
 
 
-# defaults as used by the Deblur manuscript
-# (Amir et al, mSystems 2016, in press)
+# defaults as used Bokulich et al, Nature Methods 2013,
+# same as QIIME 1.9.1
 def q_score(demux: SingleLanePerSampleSingleEndFastqDirFmt,
-            min_quality: int=20,
+            min_quality: int=4,
             quality_window: int=3,
             min_length_fraction: float=0.75,
             max_ambiguous: int=0) \
