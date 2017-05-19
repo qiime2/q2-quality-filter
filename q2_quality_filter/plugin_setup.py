@@ -22,13 +22,16 @@ plugin = qiime2.plugin.Plugin(
     version=q2_quality_filter.__version__,
     website='https://github.com/wasade/q2-quality-filter',
     package='q2_quality_filter',
-    user_support_text=None,
     citation_text=('Quality-filtering vastly improves diversity estimates '
                    'from Illumina amplicon sequencing. Nicholas A Bokulich, '
                    'Sathish Subramanian, Jeremiah J Faith, Dirk Gevers, '
                    'Jeffrey I Gordon, Rob Knight, David A Mills & J Gregory '
                    'Caporaso. Nature Methods 10, 57–59 (2013) '
-                   'doi:10.1038/nmeth.2276')
+                   'doi:10.1038/nmeth.2276'),
+    description=('This QIIME 2 plugin supports filtering and trimming of '
+                 'sequence reads based on PHRED scores and ambiguous '
+                 'nucleotide characters.'),
+    short_description='Plugin for PHRED-based filtering and trimming.'
 )
 
 plugin.register_formats(QualityFilterStatsFmt, QualityFilterStatsDirFmt)
