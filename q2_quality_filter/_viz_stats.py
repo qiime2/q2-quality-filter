@@ -33,8 +33,7 @@ def visualize_stats(output_dir: str, filter_stats: pd.DataFrame) -> None:
     columns.insert(2, 'fraction-retained')
     filter_stats = filter_stats[columns]
 
-    html = filter_stats.to_html(classes='table table-striped table-hover')
-    html = html.replace('border="1"', 'border="0"')
+    html = q2templates.df_to_html(filter_stats)
     index = os.path.join(TEMPLATES, 'index.html')
     context = {
         'result': html
