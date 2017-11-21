@@ -20,7 +20,7 @@ from q2_types.per_sample_sequences import (
         SingleLanePerSampleSingleEndFastqDirFmt)
 
 from q2_quality_filter._filter import (_read_fastq_seqs, _runs_of_ones,
-                                       _truncate, q_score)
+                                       _truncate, q_score, q_score_joined)
 
 
 class FilterTests(TestPluginBase):
@@ -143,6 +143,89 @@ class FilterTests(TestPluginBase):
         view = ar.view(SingleLanePerSampleSingleEndFastqDirFmt)
         obs_result, stats = q_score(view, min_quality=40,
                                     min_length_fraction=0.24)
+
+        # All input reads are represented here in their post-quality filtered
+        # form. Reads that are commented out were manually identified as being
+        # filtered by the q_score method. For the commented reads, the comments
+        # denote why the read is not retained.
+
+        # The first read, @HWI-EAS440_0386:1:32:15467:1432#0/1, is 25% of
+        # total read length and is indicative of a sequence at the
+        # min_length_fraction boundary.
+        exp_result = [
+                      "@HWI-EAS440_0386:1:32:15467:1432#0/1",
+                      "TACGGAGGATCCGAGCGTTATCCGGATTTATTGGGTTT",
+                      "+",
+                      "hhhhhhhhhhhhfghhhghghghhhchhhahhhhhfhh",
+
+                      # too short
+                      # "@HWI-EAS440_0386:1:36:9986:17043#0/1",
+                      # "TACGTAGGTGGCAAGCGTTATCCGGATTTATTG",
+                      # "+",
+                      # "hhhhhhhhhhhhhhhhhhhhhhhhhffhhghhh",
+
+                      "@HWI-EAS440_0386:1:37:13343:14820#0/1",
+                      ("TACGGAGGATCCGAGCGTTATCCGGATTTATTGGGTTTAAAGGGAGCGTAGAT"
+                       "GGATGTTTAAGTCAGTTGTG"),
+                      "+",
+                      ("hhhhhhhhhhhhhfhhhhhfhhhhghhhhghhhhhhhhhgghhhgghhhgghh"
+                       "hgdhhhhghghhhdhhhhgh"),
+
+                      "@HWI-EAS440_0386:1:41:18215:15404#0/1",
+                      "TACGTAGGTGGCGAGCGTTGTCCGGAATTATTGGGCGTAAAGAGCATGTA",
+                      "+",
+                      "hhhhhhhhhhhhghhhhhhhhhhhhffhhghhhhghhghgghghhhhhgh",
+
+                      # too short
+                      # "@HWI-EAS440_0386:1:42:5423:19606#0/1",
+                      # "TACGTAGGGAGCAAGCGTT",
+                      # "+",
+                      # "hhhhghhhhhhhhhghhfh",
+
+                      "@HWI-EAS440_0386:1:52:7507:5841#0/1",
+                      "TACGGAGGATCCGAGCGTTATCCGGATTTATTGGGTTT",
+                      "+",
+                      "hhhhhhhhhghhfghhhhhhhhhhgfhhhghhhghdhh",
+
+                      "@HWI-EAS440_0386:1:53:18599:4074#0/1",
+                      "TACGTAGGTGGCAAGCGTTGTCCGGATTTACTGGGTG",
+                      "+",
+                      "hhhhfhhhhhfhhhhhhfhffhghhfgghggghdcbh",
+
+                      # too short
+                      # "@HWI-EAS440_0386:1:55:16425:9514#0/1",
+                      # "TACGGAGGATCCGAGCGTTATCCGGATT",
+                      # "+",
+                      # "hhhhhhhhhhhhfghhhghghhhhhbgh",
+
+                      "@HWI-EAS440_0386:1:65:12049:5619#0/1",
+                      "TACGTAGGTGGCAAGCGTTATCCGGATTTACTGGGTGTAAAGGGCGTG",
+                      "+",
+                      "hhhhhhhhhhhhhhhhhhhhhhhhhfhhhhhhhghdhghhhhhghcfh",
+
+                      # @HWI-EAS440_0386:1:95:4837:16388#0/1
+                      # starts off < Q40
+                      ]
+
+        columns = ['sample-id', 'total-input-reads', 'total-retained-reads',
+                   'reads-truncated',
+                   'reads-too-short-after-truncation',
+                   'reads-exceeding-maximum-ambiguous-bases']
+        exp_stats = pd.DataFrame([('foo', 10, 6, 10, 4, 0)],
+                                 columns=columns)
+        exp_stats = exp_stats.set_index('sample-id')
+        obs = []
+        iterator = obs_result.sequences.iter_views(FastqGzFormat)
+        for sample_id, fp in iterator:
+            obs.extend([l.strip() for l in gzip.open(str(fp), 'rt')])
+        self.assertEqual(obs, exp_result)
+        pdt.assert_frame_equal(stats, exp_stats.loc[stats.index])
+
+    def test_q_score_real_joined(self):
+        ar = Artifact.load(self.get_data_path('real_data_joined.qza'))
+        view = ar.view(SingleLanePerSampleSingleEndFastqDirFmt)
+        obs_result, stats = q_score_joined(
+            view, min_quality=40, min_length_fraction=0.24)
 
         # All input reads are represented here in their post-quality filtered
         # form. Reads that are commented out were manually identified as being
