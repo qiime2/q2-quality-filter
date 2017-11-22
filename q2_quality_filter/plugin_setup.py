@@ -50,11 +50,6 @@ _q_score_parameters = {
     'max_ambiguous': qiime2.plugin.Int
 }
 
-_q_score_outputs = [
-    ('filtered_sequences', SampleData[JoinedSequencesWithQuality]),
-    ('filter_stats', QualityFilterStats)
-]
-
 _q_score_input_descriptions = {
     'demux': 'The demultiplexed sequence data to be quality filtered.'
 }
@@ -85,7 +80,10 @@ plugin.methods.register_function(
     function=q2_quality_filter.q_score,
     inputs={'demux': SampleData[SequencesWithQuality]},
     parameters=_q_score_parameters,
-    outputs=_q_score_outputs,
+    outputs=[
+        ('filtered_sequences', SampleData[SequencesWithQuality]),
+        ('filter_stats', QualityFilterStats)
+    ],
     input_descriptions=_q_score_input_descriptions,
     parameter_descriptions=_q_score_parameter_descriptions,
     output_descriptions=_q_score_output_descriptions,
@@ -98,7 +96,10 @@ plugin.methods.register_function(
     function=q2_quality_filter.q_score_joined,
     inputs={'demux': SampleData[JoinedSequencesWithQuality]},
     parameters=_q_score_parameters,
-    outputs=_q_score_outputs,
+    outputs=[
+        ('filtered_sequences', SampleData[JoinedSequencesWithQuality]),
+        ('filter_stats', QualityFilterStats)
+    ],
     input_descriptions=_q_score_input_descriptions,
     parameter_descriptions=_q_score_parameter_descriptions,
     output_descriptions=_q_score_output_descriptions,
