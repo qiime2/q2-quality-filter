@@ -60,19 +60,19 @@ _q_score_input_descriptions = {
 }
 
 _q_score_parameter_descriptions = {
-    'min_quality': ('The minimum acceptable PHRED score. All PHRED scores '
-                    'less that this value are considered to be low PHRED '
-                    'scores.'),
-    'quality_window': ('The maximum number of low PHRED scores that '
-                       'can be observed in direct succession before '
-                       'truncating a sequence read.'),
-    'min_length_fraction': ('The minimum length that a sequence read can '
-                            'be following truncation and still be '
-                            'retained. This length should be provided '
-                            'as a fraction of the input sequence length.'),
-    'max_ambiguous': ('The maximum number of ambiguous (i.e., N) base '
-                      'calls. This is applied after trimming sequences '
-                      'based on `min_length_fraction`.')
+    'min_quality': 'The minimum acceptable PHRED score. All PHRED scores '
+                   'less that this value are considered to be low PHRED '
+                   'scores.',
+    'quality_window': 'The maximum number of low PHRED scores that '
+                      'can be observed in direct succession before '
+                      'truncating a sequence read.',
+    'min_length_fraction': 'The minimum length that a sequence read can '
+                           'be following truncation and still be '
+                           'retained. This length should be provided '
+                           'as a fraction of the input sequence length.',
+    'max_ambiguous': 'The maximum number of ambiguous (i.e., N) base '
+                     'calls. This is applied after trimming sequences '
+                     'based on `min_length_fraction`.'
 }
 
 _q_score_output_descriptions = {
@@ -103,8 +103,8 @@ plugin.methods.register_function(
     parameter_descriptions=_q_score_parameter_descriptions,
     output_descriptions=_q_score_output_descriptions,
     name='Quality filter based on joined sequence quality scores.',
-    description=('This method filters joined sequence based on quality '
-                 'scores and the presence of ambiguous base calls.')
+    description='This method filters joined sequence based on quality '
+                'scores and the presence of ambiguous base calls.'
 )
 
 plugin.visualizers.register_function(

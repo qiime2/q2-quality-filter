@@ -248,11 +248,11 @@ class FilterTests(TestPluginBase):
                       # "hhhhhhhhhhhhhhhhhhhhhhhhhffhhghhh",
 
                       "@HWI-EAS440_0386:1:37:13343:14820#0/1",
-                      ("TACGGAGGATCCGAGCGTTATCCGGATTTATTGGGTTTAAAGGGAGCGTAGAT"
-                       "GGATGTTTAAGTCAGTTGTG"),
+                      "TACGGAGGATCCGAGCGTTATCCGGATTTATTGGGTTTAAAGGGAGCGTAGAT"
+                      "GGATGTTTAAGTCAGTTGTG",
                       "+",
-                      ("hhhhhhhhhhhhhfhhhhhfhhhhghhhhghhhhhhhhhgghhhgghhhgghh"
-                       "hgdhhhhghghhhdhhhhgh"),
+                      "hhhhhhhhhhhhhfhhhhhfhhhhghhhhghhhhhhhhhgghhhgghhhgghh"
+                      "hgdhhhhghghhhdhhhhgh",
 
                       "@HWI-EAS440_0386:1:41:18215:15404#0/1",
                       "TACGTAGGTGGCGAGCGTTGTCCGGAATTATTGGGCGTAAAGAGCATGTA",
