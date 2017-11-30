@@ -11,7 +11,8 @@ import importlib
 import qiime2.plugin
 from q2_types.sample_data import SampleData
 from q2_types.per_sample_sequences import (
-    SequencesWithQuality, JoinedSequencesWithQuality)
+    SequencesWithQuality, PairedEndSequencesWithQuality,
+    JoinedSequencesWithQuality)
 
 import q2_quality_filter
 from q2_quality_filter._type import QualityFilterStats
@@ -78,7 +79,8 @@ _q_score_output_descriptions = {
 
 plugin.methods.register_function(
     function=q2_quality_filter.q_score,
-    inputs={'demux': SampleData[SequencesWithQuality]},
+    inputs={'demux': (SampleData[SequencesWithQuality] |
+                      SampleData[PairedEndSequencesWithQuality])},
     parameters=_q_score_parameters,
     outputs=[
         ('filtered_sequences', SampleData[SequencesWithQuality]),
