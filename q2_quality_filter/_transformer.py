@@ -7,6 +7,7 @@
 # ----------------------------------------------------------------------------
 
 import pandas as pd
+import qiime2
 
 from .plugin_setup import plugin
 from ._format import QualityFilterStatsFmt
@@ -19,6 +20,15 @@ def _1(data: pd.DataFrame) -> QualityFilterStatsFmt:
     return ff
 
 
+def _stats_to_df(ff):
+    return pd.read_csv(str(ff), index_col='sample-id')
+
+
 @plugin.register_transformer
 def _2(ff: QualityFilterStatsFmt) -> pd.DataFrame:
-    return pd.read_csv(str(ff), index_col='sample-id')
+    return _stats_to_df(ff)
+
+
+@plugin.register_transformer
+def _3(ff: QualityFilterStatsFmt) -> qiime2.Metadata:
+    return qiime2.Metadata(_stats_to_df(ff))

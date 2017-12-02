@@ -108,16 +108,4 @@ plugin.methods.register_function(
                 'scores and the presence of ambiguous base calls.'
 )
 
-plugin.visualizers.register_function(
-    function=q2_quality_filter.visualize_stats,
-    inputs={'filter_stats': QualityFilterStats},
-    parameters={},
-    input_descriptions={
-        'filter_stats': 'Summary statistics of a quality filtering process.'
-    },
-    parameter_descriptions={},
-    name='Visualize filtering stats per sample.',
-    description='Display filtering statistics per sample'
-)
-
 importlib.import_module('q2_quality_filter._transformer')
