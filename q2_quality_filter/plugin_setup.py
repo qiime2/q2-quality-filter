@@ -79,8 +79,8 @@ _q_score_output_descriptions = {
 
 plugin.methods.register_function(
     function=q2_quality_filter.q_score,
-    inputs={'demux': (SampleData[SequencesWithQuality] |
-                      SampleData[PairedEndSequencesWithQuality])},
+    inputs={'demux': SampleData[SequencesWithQuality |
+                                PairedEndSequencesWithQuality]},
     parameters=_q_score_parameters,
     outputs=[
         ('filtered_sequences', SampleData[SequencesWithQuality]),
