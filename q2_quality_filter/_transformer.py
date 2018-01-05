@@ -7,6 +7,7 @@
 # ----------------------------------------------------------------------------
 
 import pandas as pd
+import numpy as np
 import qiime2
 
 from .plugin_setup import plugin
@@ -20,8 +21,19 @@ def _1(data: pd.DataFrame) -> QualityFilterStatsFmt:
     return ff
 
 
+_stats_column_dtypes = {
+    'sample-id': np.str,
+    'total-input-reads': np.number,
+    'total-retained-reads': np.number,
+    'reads-truncated': np.number,
+    'reads-too-short-after-truncation': np.number,
+    'reads-exceeding-maximum-ambiguous-bases': np.number
+}
+
+
 def _stats_to_df(ff):
-    return pd.read_csv(str(ff), index_col='sample-id')
+    return pd.read_csv(str(ff), index_col='sample-id',
+                       dtype=_stats_column_dtypes)
 
 
 @plugin.register_transformer
