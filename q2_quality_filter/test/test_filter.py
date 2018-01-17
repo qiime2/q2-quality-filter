@@ -11,6 +11,7 @@ import gzip
 
 import pandas as pd
 import pandas.util.testing as pdt
+import qiime2
 from qiime2.sdk import Artifact
 import numpy as np
 import numpy.testing as npt
@@ -21,6 +22,7 @@ from q2_types.per_sample_sequences import (
 
 from q2_quality_filter._filter import (_read_fastq_seqs, _runs_of_ones,
                                        _truncate, q_score, q_score_joined)
+from q2_quality_filter._format import QualityFilterStatsFmt
 
 
 class FilterTests(TestPluginBase):
@@ -303,6 +305,20 @@ class FilterTests(TestPluginBase):
             obs.extend([l.strip() for l in gzip.open(str(fp), 'rt')])
         self.assertEqual(obs, exp_result)
         pdt.assert_frame_equal(stats, exp_stats.loc[stats.index])
+
+
+class TransformerTests(TestPluginBase):
+    package = 'q2_quality_filter.test'
+
+    def test_stats_to_metadata(self):
+        filepath = self.get_data_path('stats-1.txt')
+        format = QualityFilterStatsFmt(filepath, mode='r')
+        transformer = self.get_transformer(QualityFilterStatsFmt,
+                                           qiime2.Metadata)
+        obs = transformer(format)
+        self.assertEqual(obs.id_count, 34)
+        self.assertEqual(obs.column_count, 5)
+        self.assertEqual(obs.id_header, 'sample-id')
 
 
 if __name__ == '__main__':
