@@ -19,22 +19,19 @@ from q2_quality_filter._type import QualityFilterStats
 from q2_quality_filter._format import (QualityFilterStatsFmt,
                                        QualityFilterStatsDirFmt)
 
+citations = qiime2.plugin.Citations.load(
+    'citations.bib', package='q2_quality_filter')
 plugin = qiime2.plugin.Plugin(
     name='quality-filter',
     version=q2_quality_filter.__version__,
     website='https://github.com/qiime2/q2-quality-filter',
     package='q2_quality_filter',
     user_support_text=None,
-    citation_text=('Quality-filtering vastly improves diversity estimates '
-                   'from Illumina amplicon sequencing. Nicholas A Bokulich, '
-                   'Sathish Subramanian, Jeremiah J Faith, Dirk Gevers, '
-                   'Jeffrey I Gordon, Rob Knight, David A Mills & J Gregory '
-                   'Caporaso. Nature Methods 10, 57–59 (2013) '
-                   'doi:10.1038/nmeth.2276'),
     description=('This QIIME 2 plugin supports filtering and trimming of '
                  'sequence reads based on PHRED scores and ambiguous '
                  'nucleotide characters.'),
-    short_description='Plugin for PHRED-based filtering and trimming.'
+    short_description='Plugin for PHRED-based filtering and trimming.',
+    citations=citations
 )
 
 plugin.register_formats(QualityFilterStatsFmt, QualityFilterStatsDirFmt)
