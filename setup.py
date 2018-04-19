@@ -24,6 +24,7 @@ setup(
         ["q2-quality-filter=q2_quality_filter.plugin_setup:plugin"]
     },
     package_data={
+        "q2_quality_filter": ["citations.bib"],
         "q2_quality_filter.test": ["data/*"],
     },
     zip_safe=False,
