@@ -320,6 +320,16 @@ class TransformerTests(TestPluginBase):
         self.assertEqual(obs.column_count, 5)
         self.assertEqual(obs.id_header, 'sample-id')
 
+    def test_numeric_ids(self):
+        filepath = self.get_data_path('stats-numeric.txt')
+        format = QualityFilterStatsFmt(filepath, mode='r')
+        transformer = self.get_transformer(QualityFilterStatsFmt,
+                                           qiime2.Metadata)
+        obs = transformer(format)
+        self.assertEqual(obs.id_count, 34)
+        self.assertEqual(obs.column_count, 5)
+        self.assertEqual(obs.id_header, 'sample-id')
+
 
 if __name__ == '__main__':
     unittest.main()

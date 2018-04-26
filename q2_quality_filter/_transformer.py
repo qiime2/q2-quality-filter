@@ -32,8 +32,10 @@ _stats_column_dtypes = {
 
 
 def _stats_to_df(ff):
-    return pd.read_csv(str(ff), index_col='sample-id',
-                       dtype=_stats_column_dtypes)
+    # https://github.com/pandas-dev/pandas/issues/9435
+    df = pd.read_csv(str(ff), dtype=_stats_column_dtypes)
+    df.set_index('sample-id', inplace=True)
+    return df
 
 
 @plugin.register_transformer
