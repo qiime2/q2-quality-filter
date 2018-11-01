@@ -62,10 +62,11 @@ _default_params = {
 
 
 def q_score(demux: SingleLanePerSampleSingleEndFastqDirFmt,
-            min_quality: int=_default_params['min_quality'],
-            quality_window: int=_default_params['quality_window'],
-            min_length_fraction: float=_default_params['min_length_fraction'],
-            max_ambiguous: int=_default_params['max_ambiguous']) \
+            min_quality: int = _default_params['min_quality'],
+            quality_window: int = _default_params['quality_window'],
+            min_length_fraction:
+            float = _default_params['min_length_fraction'],
+            max_ambiguous: int = _default_params['max_ambiguous']) \
                   -> (SingleLanePerSampleSingleEndFastqDirFmt,
                       pd.DataFrame):
     result = SingleLanePerSampleSingleEndFastqDirFmt()
@@ -185,10 +186,11 @@ def q_score(demux: SingleLanePerSampleSingleEndFastqDirFmt,
 
 def q_score_joined(
             demux: SingleLanePerSampleSingleEndFastqDirFmt,
-            min_quality: int=_default_params['min_quality'],
-            quality_window: int=_default_params['quality_window'],
-            min_length_fraction: float=_default_params['min_length_fraction'],
-            max_ambiguous: int=_default_params['max_ambiguous']) \
+            min_quality: int = _default_params['min_quality'],
+            quality_window: int = _default_params['quality_window'],
+            min_length_fraction:
+            float = _default_params['min_length_fraction'],
+            max_ambiguous: int = _default_params['max_ambiguous']) \
                   -> (SingleLanePerSampleSingleEndFastqDirFmt,
                       pd.DataFrame):
     return q_score(demux, min_quality, quality_window,
