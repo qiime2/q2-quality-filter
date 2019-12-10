@@ -41,6 +41,14 @@ plugin.register_semantic_type_to_format(
     QualityFilterStats,
     artifact_format=QualityFilterStatsDirFmt)
 
+InputMap, OutputMap = qiime2.plugin.TypeMap({
+    SampleData[SequencesWithQuality | PairedEndSequencesWithQuality]:
+        SampleData[SequencesWithQuality],
+
+    SampleData[JoinedSequencesWithQuality]:
+        SampleData[JoinedSequencesWithQuality],
+})
+
 _q_score_parameters = {
     'min_quality': qiime2.plugin.Int,
     'quality_window': qiime2.plugin.Int,
@@ -76,11 +84,10 @@ _q_score_output_descriptions = {
 
 plugin.methods.register_function(
     function=q2_quality_filter.q_score,
-    inputs={'demux': SampleData[SequencesWithQuality |
-                                PairedEndSequencesWithQuality]},
+    inputs={'demux': InputMap},
     parameters=_q_score_parameters,
     outputs=[
-        ('filtered_sequences', SampleData[SequencesWithQuality]),
+        ('filtered_sequences', OutputMap),
         ('filter_stats', QualityFilterStats)
     ],
     input_descriptions=_q_score_input_descriptions,
@@ -104,7 +111,8 @@ plugin.methods.register_function(
     output_descriptions=_q_score_output_descriptions,
     name='Quality filter based on joined sequence quality scores.',
     description='This method filters joined sequence based on quality '
-                'scores and the presence of ambiguous base calls.'
+                'scores and the presence of ambiguous base calls.',
+    deprecated=True,
 )
 
 importlib.import_module('q2_quality_filter._transformer')

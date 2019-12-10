@@ -8,6 +8,7 @@
 
 import unittest
 import gzip
+import os
 
 import pandas as pd
 import pandas.util.testing as pdt
@@ -16,12 +17,14 @@ from qiime2.sdk import Artifact
 import numpy as np
 import numpy.testing as npt
 from qiime2.plugin.testing import TestPluginBase
+from qiime2.util import redirected_stdio
 from q2_types.per_sample_sequences import (
         FastqGzFormat,
-        SingleLanePerSampleSingleEndFastqDirFmt)
+        SingleLanePerSampleSingleEndFastqDirFmt,
+)
 
 from q2_quality_filter._filter import (_read_fastq_seqs, _runs_of_ones,
-                                       _truncate, q_score, q_score_joined)
+                                       _truncate)
 from q2_quality_filter._format import QualityFilterStatsFmt
 
 
@@ -75,16 +78,20 @@ class FilterTests(TestPluginBase):
 
     def test_q_score_all_dropped(self):
         ar = Artifact.load(self.get_data_path('simple.qza'))
-        view = ar.view(SingleLanePerSampleSingleEndFastqDirFmt)
 
         with self.assertRaisesRegex(ValueError, "filtered out"):
-            q_score(view, min_quality=50)
+            with redirected_stdio(stdout=os.devnull):
+                self.plugin.methods['q_score'](ar, min_quality=50)
 
     def test_q_score_numeric_ids(self):
         ar = Artifact.load(self.get_data_path('numeric_ids.qza'))
-        view = ar.view(SingleLanePerSampleSingleEndFastqDirFmt)
         exp_sids = {'00123', '0.4560'}
-        obs, stats = q_score(view, min_quality=20)
+
+        with redirected_stdio(stdout=os.devnull):
+            obs_ar, stats_ar = self.plugin.methods['q_score'](
+                ar, min_quality=20)
+        obs = obs_ar.view(SingleLanePerSampleSingleEndFastqDirFmt)
+        stats = stats_ar.view(pd.DataFrame)
         obs_manifest = obs.manifest.view(obs.manifest.format)
         obs_manifest = pd.read_csv(obs_manifest.open(), dtype=str, comment='#')
         obs_manifest.set_index('sample-id', inplace=True)
@@ -95,10 +102,12 @@ class FilterTests(TestPluginBase):
 
     def test_q_score(self):
         ar = Artifact.load(self.get_data_path('simple.qza'))
-        view = ar.view(SingleLanePerSampleSingleEndFastqDirFmt)
-        obs_drop_ambig, stats = q_score(view, quality_window=2,
-                                        min_quality=20,
-                                        min_length_fraction=0.25)
+        with redirected_stdio(stdout=os.devnull):
+            obs_drop_ambig_ar, stats_ar = self.plugin.methods['q_score'](
+                ar, quality_window=2, min_quality=20, min_length_fraction=0.25)
+        obs_drop_ambig = obs_drop_ambig_ar.view(
+            SingleLanePerSampleSingleEndFastqDirFmt)
+        stats = stats_ar.view(pd.DataFrame)
 
         exp_drop_ambig = ["@foo_1",
                           "ATGCATGC",
@@ -108,8 +117,8 @@ class FilterTests(TestPluginBase):
                    'reads-truncated',
                    'reads-too-short-after-truncation',
                    'reads-exceeding-maximum-ambiguous-bases']
-        exp_drop_ambig_stats = pd.DataFrame([('foo', 2, 1, 0, 0, 1),
-                                             ('bar', 1, 0, 0, 0, 1)],
+        exp_drop_ambig_stats = pd.DataFrame([('foo', 2., 1., 0., 0., 1.),
+                                             ('bar', 1., 0., 0., 0., 1.)],
                                             columns=columns)
         exp_drop_ambig_stats = exp_drop_ambig_stats.set_index('sample-id')
         obs = []
@@ -119,8 +128,12 @@ class FilterTests(TestPluginBase):
         self.assertEqual(obs, exp_drop_ambig)
         pdt.assert_frame_equal(stats, exp_drop_ambig_stats.loc[stats.index])
 
-        obs_trunc, stats = q_score(view, quality_window=1, min_quality=33,
-                                   min_length_fraction=0.25)
+        with redirected_stdio(stdout=os.devnull):
+            obs_trunc_ar, stats_ar = self.plugin.methods['q_score'](
+                ar, quality_window=1, min_quality=33, min_length_fraction=0.25)
+        obs_trunc = obs_trunc_ar.view(SingleLanePerSampleSingleEndFastqDirFmt)
+        stats = stats_ar.view(pd.DataFrame)
+
         exp_trunc = ["@foo_1",
                      "ATGCATGC",
                      "+",
@@ -129,8 +142,8 @@ class FilterTests(TestPluginBase):
                      "ATA",
                      "+",
                      "DDD"]
-        exp_trunc_stats = pd.DataFrame([('foo', 2, 1, 0, 0, 1),
-                                        ('bar', 1, 1, 1, 0, 0)],
+        exp_trunc_stats = pd.DataFrame([('foo', 2., 1., 0., 0., 1.),
+                                        ('bar', 1., 1., 1., 0., 0.)],
                                        columns=columns)
         exp_trunc_stats = exp_trunc_stats.set_index('sample-id')
 
@@ -142,9 +155,11 @@ class FilterTests(TestPluginBase):
 
     def test_q_score_real(self):
         ar = Artifact.load(self.get_data_path('real_data.qza'))
-        view = ar.view(SingleLanePerSampleSingleEndFastqDirFmt)
-        obs_result, stats = q_score(view, min_quality=40,
-                                    min_length_fraction=0.24)
+        with redirected_stdio(stdout=os.devnull):
+            obs_ar, stats_ar = self.plugin.methods['q_score'](
+                ar, min_quality=40, min_length_fraction=0.24)
+        obs_result = obs_ar.view(SingleLanePerSampleSingleEndFastqDirFmt)
+        stats = stats_ar.view(pd.DataFrame)
 
         # All input reads are represented here in their post-quality filtered
         # form. Reads that are commented out were manually identified as being
@@ -213,7 +228,7 @@ class FilterTests(TestPluginBase):
                    'reads-truncated',
                    'reads-too-short-after-truncation',
                    'reads-exceeding-maximum-ambiguous-bases']
-        exp_stats = pd.DataFrame([('foo', 10, 6, 10, 4, 0)],
+        exp_stats = pd.DataFrame([('foo', 10., 6., 10., 4., 0.)],
                                  columns=columns)
         exp_stats = exp_stats.set_index('sample-id')
         obs = []
@@ -225,9 +240,11 @@ class FilterTests(TestPluginBase):
 
     def test_q_score_real_joined(self):
         ar = Artifact.load(self.get_data_path('real_data_joined.qza'))
-        view = ar.view(SingleLanePerSampleSingleEndFastqDirFmt)
-        obs_result, stats = q_score_joined(
-            view, min_quality=40, min_length_fraction=0.24)
+        with redirected_stdio(stdout=os.devnull):
+            obs_ar, stats_ar = self.plugin.methods['q_score'](
+                ar, min_quality=40, min_length_fraction=0.24)
+        obs_result = obs_ar.view(SingleLanePerSampleSingleEndFastqDirFmt)
+        stats = stats_ar.view(pd.DataFrame)
 
         # All input reads are represented here in their post-quality filtered
         # form. Reads that are commented out were manually identified as being
@@ -296,7 +313,7 @@ class FilterTests(TestPluginBase):
                    'reads-truncated',
                    'reads-too-short-after-truncation',
                    'reads-exceeding-maximum-ambiguous-bases']
-        exp_stats = pd.DataFrame([('foo', 10, 6, 10, 4, 0)],
+        exp_stats = pd.DataFrame([('foo', 10., 6., 10., 4., 0.)],
                                  columns=columns)
         exp_stats = exp_stats.set_index('sample-id')
         obs = []
