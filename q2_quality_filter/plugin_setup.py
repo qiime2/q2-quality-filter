@@ -110,8 +110,8 @@ plugin.methods.register_function(
     parameter_descriptions=_q_score_parameter_descriptions,
     output_descriptions=_q_score_output_descriptions,
     name='Quality filter based on joined sequence quality scores.',
-    description='This method filters joined sequence based on quality '
-                'scores and the presence of ambiguous base calls.',
+    description='This deprecated method filters joined sequences based on '
+                'quality scores and the presence of ambiguous base calls.',
     deprecated=True,
 )
 

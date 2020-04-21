@@ -19,12 +19,15 @@ import numpy.testing as npt
 from qiime2.plugin.testing import TestPluginBase
 from qiime2.util import redirected_stdio
 from q2_types.per_sample_sequences import (
-        FastqGzFormat,
-        SingleLanePerSampleSingleEndFastqDirFmt,
+    FastqGzFormat,
+    SingleLanePerSampleSingleEndFastqDirFmt,
 )
 
-from q2_quality_filter._filter import (_read_fastq_seqs, _runs_of_ones,
-                                       _truncate)
+from q2_quality_filter._filter import (
+    _read_fastq_seqs,
+    _runs_of_ones,
+    _truncate,
+)
 from q2_quality_filter._format import QualityFilterStatsFmt
 
 
