@@ -9,10 +9,10 @@ lint:
 	flake8
 
 test: all
-	nosetests
+	py.test
 
 test-cov: all
-	nosetests
+	py.test --cov=q2_quality_filter
 
 install: all
 	$(PYTHON) setup.py install

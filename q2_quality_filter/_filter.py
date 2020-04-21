@@ -61,6 +61,7 @@ _default_params = {
 }
 
 
+# TODO: fix up demux fmt writing a la q2-cutadapt
 def q_score(demux: SingleLanePerSampleSingleEndFastqDirFmt,
             min_quality: int = _default_params['min_quality'],
             quality_window: int = _default_params['quality_window'],
