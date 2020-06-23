@@ -6,10 +6,10 @@
 # The full license is in the file LICENSE, distributed with this software.
 # ----------------------------------------------------------------------------
 
-from ._filter import q_score, q_score_joined
+from ._filter import q_score
 from ._version import get_versions
 
 __version__ = get_versions()['version']
 del get_versions
 
-__all__ = ['q_score', 'q_score_joined']
+__all__ = ['q_score']
