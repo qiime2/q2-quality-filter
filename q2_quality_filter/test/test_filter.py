@@ -127,7 +127,7 @@ class FilterTests(TestPluginBase):
         obs = []
         iterator = obs_drop_ambig.sequences.iter_views(FastqGzFormat)
         for sample_id, fp in iterator:
-            obs.extend([l.strip() for l in gzip.open(str(fp), 'rt')])
+            obs.extend([x.strip() for x in gzip.open(str(fp), 'rt')])
         self.assertEqual(obs, exp_drop_ambig)
         pdt.assert_frame_equal(stats, exp_drop_ambig_stats.loc[stats.index])
 
@@ -152,7 +152,7 @@ class FilterTests(TestPluginBase):
 
         obs = []
         for sample_id, fp in obs_trunc.sequences.iter_views(FastqGzFormat):
-            obs.extend([l.strip() for l in gzip.open(str(fp), 'rt')])
+            obs.extend([x.strip() for x in gzip.open(str(fp), 'rt')])
         self.assertEqual(sorted(obs), sorted(exp_trunc))
         pdt.assert_frame_equal(stats, exp_trunc_stats.loc[stats.index])
 
@@ -237,7 +237,7 @@ class FilterTests(TestPluginBase):
         obs = []
         iterator = obs_result.sequences.iter_views(FastqGzFormat)
         for sample_id, fp in iterator:
-            obs.extend([l.strip() for l in gzip.open(str(fp), 'rt')])
+            obs.extend([x.strip() for x in gzip.open(str(fp), 'rt')])
         self.assertEqual(obs, exp_result)
         pdt.assert_frame_equal(stats, exp_stats.loc[stats.index])
 
@@ -322,7 +322,7 @@ class FilterTests(TestPluginBase):
         obs = []
         iterator = obs_result.sequences.iter_views(FastqGzFormat)
         for sample_id, fp in iterator:
-            obs.extend([l.strip() for l in gzip.open(str(fp), 'rt')])
+            obs.extend([x.strip() for x in gzip.open(str(fp), 'rt')])
         self.assertEqual(obs, exp_result)
         pdt.assert_frame_equal(stats, exp_stats.loc[stats.index])
 
