@@ -98,21 +98,4 @@ plugin.methods.register_function(
                  'the presence of ambiguous base calls.')
 )
 
-plugin.methods.register_function(
-    function=q2_quality_filter.q_score_joined,
-    inputs={'demux': SampleData[JoinedSequencesWithQuality]},
-    parameters=_q_score_parameters,
-    outputs=[
-        ('filtered_sequences', SampleData[JoinedSequencesWithQuality]),
-        ('filter_stats', QualityFilterStats)
-    ],
-    input_descriptions=_q_score_input_descriptions,
-    parameter_descriptions=_q_score_parameter_descriptions,
-    output_descriptions=_q_score_output_descriptions,
-    name='Quality filter based on joined sequence quality scores.',
-    description='This deprecated method filters joined sequences based on '
-                'quality scores and the presence of ambiguous base calls.',
-    deprecated=True,
-)
-
 importlib.import_module('q2_quality_filter._transformer')
