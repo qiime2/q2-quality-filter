@@ -52,3 +52,4 @@ jobs:
         package-name: q2-quality-filter
         build-target: staging
         additional-tests: py.test --pyargs q2_quality_filter
+        library-token: ${{ secrets.LIBRARY_TOKEN }}
