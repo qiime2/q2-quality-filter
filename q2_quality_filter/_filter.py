@@ -20,10 +20,11 @@ from q2_types.per_sample_sequences import (
 def _read_fastq_seqs(filepath, phred_offset):
     # This function is adapted from @jairideout's SO post:
     # http://stackoverflow.com/a/39302117/3424666
-    fh = gzip.open(filepath, 'rt')
+    fh = gzip.open(filepath, 'rb')
     for seq_header, seq, qual_header, qual in itertools.zip_longest(*[fh] * 4):
         qual = qual.strip()
-        qual_parsed = np.fromstring(qual, dtype=np.uint8) - phred_offset
+        qual_parsed = np.frombuffer(memoryview(qual), dtype=np.uint8)
+        qual_parsed = qual_parsed - phred_offset
         yield (seq_header.strip(), seq.strip(), qual_header.strip(),
                qual, qual_parsed)
 
@@ -86,7 +87,8 @@ def q_score(demux: SingleLanePerSampleSingleEndFastqDirFmt,
     log_records_totalkept_counts = {}
 
     metadata_view = demux.metadata.view(YamlFormat).open()
-    phred_offset = yaml.load(metadata_view)['phred-offset']
+    phred_offset = yaml.load(metadata_view,
+                             Loader=yaml.SafeLoader)['phred-offset']
     demux_manifest = demux.manifest.view(demux.manifest.format)
     demux_manifest = pd.read_csv(demux_manifest.open(), dtype=str)
     demux_manifest.set_index('filename', inplace=True)
@@ -139,12 +141,11 @@ def q_score(demux: SingleLanePerSampleSingleEndFastqDirFmt,
                     continue
 
             # do not keep the read if there are too many ambiguous bases
-            if sequence_record[1].count('N') > max_ambiguous:
+            if sequence_record[1].count(b'N') > max_ambiguous:
                 log_records_max_ambig_counts[sample_id] += 1
                 continue
 
-            fastq_lines = '\n'.join(sequence_record[:4]) + '\n'
-            fastq_lines = fastq_lines.encode('utf-8')
+            fastq_lines = b'\n'.join(sequence_record[:4]) + b'\n'
 
             if writer is None:
                 writer = gzip.open(str(path), mode='w')

@@ -11,7 +11,7 @@ import gzip
 import os
 
 import pandas as pd
-import pandas.util.testing as pdt
+import pandas.testing as pdt
 import qiime2
 from qiime2.sdk import Artifact
 import numpy as np
@@ -35,8 +35,8 @@ class FilterTests(TestPluginBase):
     package = 'q2_quality_filter.test'
 
     def test_read_fastq_seqs(self):
-        exp = [('@foo', 'ATGC', '+', 'IIII', np.array([40, 40, 40, 40])),
-               ('@bar', 'TGCA', '+', 'ABCD', np.array([32, 33, 34, 35]))]
+        exp = [(b'@foo', b'ATGC', b'+', b'IIII', np.array([40, 40, 40, 40])),
+               (b'@bar', b'TGCA', b'+', b'ABCD', np.array([32, 33, 34, 35]))]
         obs = list(_read_fastq_seqs(self.get_data_path('simple.fastq.gz'), 33))
         self.assertEqual(len(obs), 2)
 
@@ -120,8 +120,8 @@ class FilterTests(TestPluginBase):
                    'reads-truncated',
                    'reads-too-short-after-truncation',
                    'reads-exceeding-maximum-ambiguous-bases']
-        exp_drop_ambig_stats = pd.DataFrame([('foo', 2., 1., 0., 0., 1.),
-                                             ('bar', 1., 0., 0., 0., 1.)],
+        exp_drop_ambig_stats = pd.DataFrame([('foo', 2, 1, 0, 0, 1),
+                                             ('bar', 1, 0, 0, 0, 1)],
                                             columns=columns)
         exp_drop_ambig_stats = exp_drop_ambig_stats.set_index('sample-id')
         obs = []
@@ -145,8 +145,8 @@ class FilterTests(TestPluginBase):
                      "ATA",
                      "+",
                      "DDD"]
-        exp_trunc_stats = pd.DataFrame([('foo', 2., 1., 0., 0., 1.),
-                                        ('bar', 1., 1., 1., 0., 0.)],
+        exp_trunc_stats = pd.DataFrame([('foo', 2, 1, 0, 0, 1),
+                                        ('bar', 1, 1, 1, 0, 0)],
                                        columns=columns)
         exp_trunc_stats = exp_trunc_stats.set_index('sample-id')
 
@@ -231,7 +231,7 @@ class FilterTests(TestPluginBase):
                    'reads-truncated',
                    'reads-too-short-after-truncation',
                    'reads-exceeding-maximum-ambiguous-bases']
-        exp_stats = pd.DataFrame([('foo', 10., 6., 10., 4., 0.)],
+        exp_stats = pd.DataFrame([('foo', 10, 6, 10, 4, 0)],
                                  columns=columns)
         exp_stats = exp_stats.set_index('sample-id')
         obs = []
@@ -316,7 +316,7 @@ class FilterTests(TestPluginBase):
                    'reads-truncated',
                    'reads-too-short-after-truncation',
                    'reads-exceeding-maximum-ambiguous-bases']
-        exp_stats = pd.DataFrame([('foo', 10., 6., 10., 4., 0.)],
+        exp_stats = pd.DataFrame([('foo', 10, 6, 10, 4, 0)],
                                  columns=columns)
         exp_stats = exp_stats.set_index('sample-id')
         obs = []
