@@ -5,7 +5,8 @@
 #
 # The full license is in the file LICENSE, distributed with this software.
 # ----------------------------------------------------------------------------
-demuxed_seqs_url = 'https://data.qiime2.org/usage-examples/moving-pictures/demux.qza'
+demuxed_seqs_url = ('https://data.qiime2.org/usage-examples/moving-pictures/'
+                    'demux.qza')
 
 
 def q_score_example(use):
