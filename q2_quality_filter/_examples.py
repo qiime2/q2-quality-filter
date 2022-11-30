@@ -5,10 +5,7 @@
 #
 # The full license is in the file LICENSE, distributed with this software.
 # ----------------------------------------------------------------------------
-import qiime2
-
-epoch = qiime2.__release__
-m_p_base = f'https://docs.qiime2.org/{epoch}/data/tutorials/moving-pictures/'
+m_p_base = 'https://data.qiime2.org/usage-examples/moving-pictures/'
 demuxed_seqs_url = m_p_base + 'demux.qza'
 
 
