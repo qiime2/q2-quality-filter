@@ -18,6 +18,7 @@ import q2_quality_filter
 from q2_quality_filter._type import QualityFilterStats
 from q2_quality_filter._format import (QualityFilterStatsFmt,
                                        QualityFilterStatsDirFmt)
+import q2_quality_filter._examples as ex
 
 citations = qiime2.plugin.Citations.load(
     'citations.bib', package='q2_quality_filter')
@@ -95,7 +96,10 @@ plugin.methods.register_function(
     output_descriptions=_q_score_output_descriptions,
     name='Quality filter based on sequence quality scores.',
     description=('This method filters sequence based on quality scores and '
-                 'the presence of ambiguous base calls.')
+                 'the presence of ambiguous base calls.'),
+    examples={
+        'q_score': ex.q_score_example,
+    },
 )
 
 importlib.import_module('q2_quality_filter._transformer')

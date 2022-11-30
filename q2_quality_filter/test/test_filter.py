@@ -351,5 +351,12 @@ class TransformerTests(TestPluginBase):
         self.assertEqual(obs.id_header, 'sample-id')
 
 
+class TestUsageExamples(TestPluginBase):
+    package = 'q2_quality_filter.test'
+
+    def test_examples(self):
+        self.execute_examples()
+
+
 if __name__ == '__main__':
     unittest.main()
