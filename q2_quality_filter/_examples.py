@@ -5,7 +5,6 @@
 #
 # The full license is in the file LICENSE, distributed with this software.
 # ----------------------------------------------------------------------------
-m_p_base = 'https://data.qiime2.org/usage-examples/moving-pictures/'
 demuxed_seqs_url = 'https://data.qiime2.org/usage-examples/moving-pictures/demux.qza'
 
 
