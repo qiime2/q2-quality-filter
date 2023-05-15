@@ -26,7 +26,7 @@ requirements:
 
 test:
   commands:
-    - pytest --pyargs q2_quality_filter
+    - py.test --pyargs q2_quality_filter
     
   requires:
     - qiime2 >={{ qiime2 }}
