@@ -7,9 +7,10 @@
 # ----------------------------------------------------------------------------
 
 from ._filter import q_score
-from ._version import get_versions
 
-__version__ = get_versions()['version']
-del get_versions
+try:
+    from ._version import __version__
+except ModuleNotFoundError:
+    __version__ = '0.0.0+notfound'
 
 __all__ = ['q_score']
