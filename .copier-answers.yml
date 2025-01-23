@@ -1,0 +1,12 @@
+# Changes here will be overwritten by Copier; NEVER EDIT MANUALLY
+_commit: dfb0404
+_src_path: https://github.com/qiime2/q2-setup-template.git
+module_name: quality_filter
+plugin_name: q2_quality_filter
+plugin_scripts: null
+project_author_email: wasade@gmail.com
+project_author_name: Daniel McDonald
+project_description: Basic FASTQ quality filtering
+project_name: q2-quality-filter
+project_urls_homepage: https://github.com/wasade/q2-quality-filter
+project_urls_repository: https://github.com/qiime2/q2-quality-filter
