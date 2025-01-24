@@ -9,6 +9,7 @@
 from dataclasses import dataclass
 from enum import Enum
 import gzip
+import functools
 import multiprocessing
 import os
 from pathlib import Path
@@ -371,8 +372,8 @@ def _process_sample(
     max_ambiguous: int,
 ) -> pd.Series:
     '''
-    Processes a the fastq records belong to a single sample. Intended to be the
-    unit of parallelization.
+    Processes the fastq records belonging to a single sample. Intended to be
+    the unit of parallelization.
 
     Reads records from `input_format`, processes them, and writes the processed
     records to `output_format`. Collects and returns filtering statistics.
@@ -526,25 +527,25 @@ def q_score(
     )['phred-offset']
     demux_manifest_df = demux.manifest.view(pd.DataFrame)
 
-    # create per-sample arguments for parallel invocations
-    sample_ids = demux_manifest_df.index
-    parameters = {
-        'paired': paired,
-        'output_format_path': Path(result.path),
-        'demux_manifest': demux_manifest_df,
-        'phred_offset': phred_offset,
-        'min_quality': min_quality,
-        'quality_window': quality_window,
-        'min_length_fraction': min_length_fraction,
-        'max_ambiguous': max_ambiguous,
-    }
-    per_sample_arguments = [
-        [sample_id] + list(parameters.values()) for sample_id in sample_ids
-    ]
+    # create per-sample functions and sample_id arguments for parallel
+    # invocations
+    sample_ids = [(sample_id,) for sample_id in demux_manifest_df.index]
+
+    _process_sample_partial = functools.partial(
+        _process_sample,
+        paired=paired,
+        output_format_path=Path(result.path),
+        demux_manifest=demux_manifest_df,
+        phred_offset=phred_offset,
+        min_quality=min_quality,
+        quality_window=quality_window,
+        min_length_fraction=min_length_fraction,
+        max_ambiguous=max_ambiguous
+    )
 
     # schedule samples to processes
     with multiprocessing.Pool(num_processes) as pool:
-        all_sample_stats = pool.starmap(_process_sample, per_sample_arguments)
+        all_sample_stats = pool.starmap(_process_sample_partial, sample_ids)
 
     # update fastq manifest for retained samples
     for sample_stats in all_sample_stats:
