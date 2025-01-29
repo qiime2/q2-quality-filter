@@ -55,7 +55,8 @@ _q_score_parameters = {
     'min_quality': qiime2.plugin.Int,
     'quality_window': qiime2.plugin.Int,
     'min_length_fraction': qiime2.plugin.Float,
-    'max_ambiguous': qiime2.plugin.Int
+    'max_ambiguous': qiime2.plugin.Int,
+    'num_processes': qiime2.plugin.Threads,
 }
 
 _q_score_input_descriptions = {
@@ -80,6 +81,11 @@ _q_score_parameter_descriptions = {
     'max_ambiguous': (
         'The maximum number of ambiguous (i.e., N) base calls. This is '
         'applied after trimming sequences based on `min_length_fraction`.'
+    ),
+    'num_processes': (
+        'The number of processes to use. A higher number will improve '
+        'response time if the hardware resources are available. Request no '
+        'more than one process per available core.'
     )
 }
 

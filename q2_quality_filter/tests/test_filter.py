@@ -255,10 +255,10 @@ class HelperMethodTests(TestPluginBase):
         self.assertEqual(status, exp_status)
 
     def test_is_retained(self):
-        filtering_stats_df = pd.DataFrame(
+        filtering_stats = pd.Series(
             data=0,
-            index=['sample-a', 'sample-b', 'sample-c'],
-            columns=[
+            name='sample-a',
+            index=[
                 'total-input-reads',
                 'total-retained-reads',
                 'reads-truncated',
@@ -271,83 +271,54 @@ class HelperMethodTests(TestPluginBase):
         retained = _is_retained(
             forward_status=RecordStatus.TRUNCATED,
             reverse_status=RecordStatus.UNTRUNCATED,
-            filtering_stats_df=filtering_stats_df,
-            sample_id='sample-a'
+            filtering_stats=filtering_stats,
         )
         self.assertTrue(retained)
-        self.assertEqual(
-            filtering_stats_df.loc['sample-a', 'total-retained-reads'], 1
-        )
-        self.assertEqual(
-            filtering_stats_df.loc['sample-a', 'reads-truncated'], 1
-        )
-        filtering_stats_df.iloc[:, :] = 0
+        self.assertEqual(filtering_stats['total-retained-reads'], 1)
+        self.assertEqual(filtering_stats['reads-truncated'], 1)
+        filtering_stats[:] = 0
 
         # forward read only, retained
         retained = _is_retained(
             forward_status=RecordStatus.TRUNCATED,
             reverse_status=None,
-            filtering_stats_df=filtering_stats_df,
-            sample_id='sample-a'
+            filtering_stats=filtering_stats,
         )
         self.assertTrue(retained)
+        self.assertEqual(filtering_stats['total-retained-reads'], 1)
+        self.assertEqual(filtering_stats['reads-truncated'], 1)
         self.assertEqual(
-            filtering_stats_df.loc['sample-a', 'total-retained-reads'], 1
+            filtering_stats['reads-too-short-after-truncation'], 0
         )
-        self.assertEqual(
-            filtering_stats_df.loc['sample-a', 'reads-truncated'], 1
-        )
-        self.assertEqual(
-            filtering_stats_df.loc[
-                'sample-a', 'reads-too-short-after-truncation'
-            ],
-            0
-        )
-        filtering_stats_df.iloc[:, :] = 0
+        filtering_stats[:] = 0
 
         # forward read only, short
         retained = _is_retained(
             forward_status=RecordStatus.SHORT,
             reverse_status=None,
-            filtering_stats_df=filtering_stats_df,
-            sample_id='sample-b'
+            filtering_stats=filtering_stats,
         )
         self.assertFalse(retained)
+        self.assertEqual(filtering_stats['total-retained-reads'], 0)
+        self.assertEqual(filtering_stats['reads-truncated'], 1)
         self.assertEqual(
-            filtering_stats_df.loc['sample-b', 'total-retained-reads'], 0
+            filtering_stats['reads-too-short-after-truncation'], 1
         )
-        self.assertEqual(
-            filtering_stats_df.loc['sample-b', 'reads-truncated'], 1
-        )
-        self.assertEqual(
-            filtering_stats_df.loc[
-                'sample-b', 'reads-too-short-after-truncation'
-            ],
-            1
-        )
-        filtering_stats_df.iloc[:, :] = 0
+        filtering_stats[:] = 0
 
         # one read untruncated, one read truncated and ambiguous
         retained = _is_retained(
             forward_status=RecordStatus.UNTRUNCATED,
             reverse_status=RecordStatus.TRUNCATED_AMBIGUOUS,
-            filtering_stats_df=filtering_stats_df,
-            sample_id='sample-a'
+            filtering_stats=filtering_stats,
         )
         self.assertFalse(retained)
+        self.assertEqual(filtering_stats['total-retained-reads'], 0)
         self.assertEqual(
-            filtering_stats_df.loc['sample-a', 'total-retained-reads'], 0
+            filtering_stats['reads-exceeding-maximum-ambiguous-bases'], 1
         )
-        self.assertEqual(
-            filtering_stats_df.loc[
-                'sample-a', 'reads-exceeding-maximum-ambiguous-bases'
-            ],
-            1
-        )
-        self.assertEqual(
-            filtering_stats_df.loc['sample-a', 'reads-truncated'], 1
-        )
-        filtering_stats_df.iloc[:, :] = 0
+        self.assertEqual(filtering_stats['reads-truncated'], 1)
+        filtering_stats[:] = 0
 
     def test_write_record(self):
         fastq_record = FastqRecord(
@@ -404,58 +375,73 @@ class QScoreSingleEndTests(TestPluginBase):
         self.assertEqual(obs_sids, exp_sids)
         self.assertEqual(set(stats.index), exp_sids)
 
-    def test_q_score(self):
+    def test_q_score_different_num_processes(self):
         ar = Artifact.load(self.get_data_path('simple.qza'))
-        with redirected_stdio(stdout=os.devnull):
-            obs_drop_ambig_ar, stats_ar = self.plugin.methods['q_score'](
-                ar, quality_window=2, min_quality=20, min_length_fraction=0.25)
-        obs_drop_ambig = obs_drop_ambig_ar.view(
-            SingleLanePerSampleSingleEndFastqDirFmt)
-        stats = stats_ar.view(pd.DataFrame)
 
-        exp_drop_ambig = ["@foo_1",
-                          "ATGCATGC",
-                          "+",
-                          "DDDDBBDD"]
-        columns = ['sample-id', 'total-input-reads', 'total-retained-reads',
-                   'reads-truncated',
-                   'reads-too-short-after-truncation',
-                   'reads-exceeding-maximum-ambiguous-bases']
-        exp_drop_ambig_stats = pd.DataFrame([('foo', 2, 1, 0, 0, 1),
-                                             ('bar', 1, 0, 0, 0, 1)],
-                                            columns=columns)
-        exp_drop_ambig_stats = exp_drop_ambig_stats.set_index('sample-id')
-        obs = []
-        iterator = obs_drop_ambig.sequences.iter_views(FastqGzFormat)
-        for sample_id, fp in iterator:
-            obs.extend([x.strip() for x in gzip.open(str(fp), 'rt')])
-        self.assertEqual(obs, exp_drop_ambig)
-        pdt.assert_frame_equal(stats, exp_drop_ambig_stats.loc[stats.index])
+        for num_processes in (1, 2):
+            with redirected_stdio(stdout=os.devnull):
+                obs_drop_ambig_ar, stats_ar = self.plugin.methods['q_score'](
+                    ar,
+                    quality_window=2,
+                    min_quality=20,
+                    min_length_fraction=0.25,
+                    num_processes=num_processes,
+                )
+            obs_drop_ambig = obs_drop_ambig_ar.view(
+                SingleLanePerSampleSingleEndFastqDirFmt)
+            stats = stats_ar.view(pd.DataFrame)
 
-        with redirected_stdio(stdout=os.devnull):
-            obs_trunc_ar, stats_ar = self.plugin.methods['q_score'](
-                ar, quality_window=1, min_quality=33, min_length_fraction=0.25)
-        obs_trunc = obs_trunc_ar.view(SingleLanePerSampleSingleEndFastqDirFmt)
-        stats = stats_ar.view(pd.DataFrame)
+            exp_drop_ambig = ["@foo_1", "ATGCATGC", "+", "DDDDBBDD"]
+            columns = [
+                'sample-id',
+                'total-input-reads',
+                'total-retained-reads',
+                'reads-truncated',
+                'reads-too-short-after-truncation',
+                'reads-exceeding-maximum-ambiguous-bases'
+            ]
+            exp_drop_ambig_stats = pd.DataFrame(
+                [('foo', 2, 1, 0, 0, 1), ('bar', 1, 0, 0, 0, 1)],
+                columns=columns
+            )
+            exp_drop_ambig_stats = exp_drop_ambig_stats.set_index('sample-id')
+            obs = []
+            iterator = obs_drop_ambig.sequences.iter_views(FastqGzFormat)
+            for sample_id, fp in iterator:
+                obs.extend([x.strip() for x in gzip.open(str(fp), 'rt')])
+            self.assertEqual(obs, exp_drop_ambig)
+            pdt.assert_frame_equal(
+                stats, exp_drop_ambig_stats.loc[stats.index]
+            )
 
-        exp_trunc = ["@foo_1",
-                     "ATGCATGC",
-                     "+",
-                     "DDDDBBDD",
-                     "@bar_1",
-                     "ATA",
-                     "+",
-                     "DDD"]
-        exp_trunc_stats = pd.DataFrame([('foo', 2, 1, 0, 0, 1),
-                                        ('bar', 1, 1, 1, 0, 0)],
-                                       columns=columns)
-        exp_trunc_stats = exp_trunc_stats.set_index('sample-id')
+            with redirected_stdio(stdout=os.devnull):
+                obs_trunc_ar, stats_ar = self.plugin.methods['q_score'](
+                    ar,
+                    quality_window=1,
+                    min_quality=33,
+                    min_length_fraction=0.25,
+                    num_processes=num_processes,
+                )
+            obs_trunc = obs_trunc_ar.view(
+                SingleLanePerSampleSingleEndFastqDirFmt
+            )
+            stats = stats_ar.view(pd.DataFrame)
 
-        obs = []
-        for sample_id, fp in obs_trunc.sequences.iter_views(FastqGzFormat):
-            obs.extend([x.strip() for x in gzip.open(str(fp), 'rt')])
-        self.assertEqual(sorted(obs), sorted(exp_trunc))
-        pdt.assert_frame_equal(stats, exp_trunc_stats.loc[stats.index])
+            exp_trunc = [
+                "@foo_1", "ATGCATGC", "+", "DDDDBBDD",
+                "@bar_1", "ATA", "+", "DDD"
+            ]
+            exp_trunc_stats = pd.DataFrame(
+                [('foo', 2, 1, 0, 0, 1), ('bar', 1, 1, 1, 0, 0)],
+                columns=columns
+            )
+            exp_trunc_stats = exp_trunc_stats.set_index('sample-id')
+
+            obs = []
+            for sample_id, fp in obs_trunc.sequences.iter_views(FastqGzFormat):
+                obs.extend([x.strip() for x in gzip.open(str(fp), 'rt')])
+            self.assertEqual(sorted(obs), sorted(exp_trunc))
+            pdt.assert_frame_equal(stats, exp_trunc_stats.loc[stats.index])
 
     def test_q_score_real(self):
         self.maxDiff = None
